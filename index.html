@@ -319,12 +319,16 @@
         <div class="glass-popup login-modal">
             <button class="close-popup"><i class="fa-solid fa-xmark"></i></button>
             <h2 class="admin-modal-title">Admin Login</h2>
-            <form class="login-form" id="login-form" autocomplete="off">
+            <form class="login-form" id="login-form" autocomplete="off" novalidate>
+                <!-- Use a dummy hidden input to trick autofill managers -->
+                <input type="text" style="display:none" autocomplete="username">
+                <input type="password" style="display:none" autocomplete="current-password">
+
                 <div class="input-group">
-                    <input type="email" id="admin-email" name="admin_email_fake" placeholder="Email" class="glass-input" autocomplete="off" required>
+                    <input type="email" id="admin-email" name="user_email_secure" placeholder="Email" class="glass-input" autocomplete="off" readonly onfocus="this.removeAttribute('readonly');" required>
                 </div>
                 <div class="input-group" style="margin-top: 15px;">
-                    <input type="password" id="admin-password" name="admin_pass_fake" placeholder="Password" class="glass-input" autocomplete="new-password" required>
+                    <input type="password" id="admin-password" name="user_pass_secure" placeholder="Password" class="glass-input" autocomplete="new-password" readonly onfocus="this.removeAttribute('readonly');" required>
                 </div>
                 <p id="login-error" class="error-msg" style="display: none; color: #ef4444; font-size: 12px;"></p>
                 <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 20px;">Login</button>

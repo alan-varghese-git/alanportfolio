@@ -279,6 +279,12 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             loginPopup.classList.add('active');
             loginError.style.display = 'none';
+
+            // Remove readonly protection right when user actively opens the modal
+            setTimeout(() => {
+                document.getElementById('admin-email').removeAttribute('readonly');
+                document.getElementById('admin-password').removeAttribute('readonly');
+            }, 150);
         }
     });
 
