@@ -370,51 +370,27 @@ section {
 }
 
 .glowing-border {
-    padding: 15px;
+    padding: 10px;
     border-radius: 50%;
-    /* Outward fading radial background */
-    background: radial-gradient(circle at center, rgba(59, 130, 246, 0.8) 0%, rgba(59, 130, 246, 0.3) 40%, transparent 70%);
-    animation: pulseGlow 4s ease-in-out infinite alternate;
-    width: 330px;
-    height: 330px;
+    /* Tighter radial gradient for subtle outward fade */
+    background: radial-gradient(circle at center, rgba(59, 130, 246, 0.4) 0%, rgba(59, 130, 246, 0.1) 50%, transparent 80%);
+    animation: subtlePulse 4s ease-in-out infinite alternate;
+    width: 320px;
+    height: 320px;
     display: flex;
     align-items: center;
     justify-content: center;
     position: relative;
 }
 
-/* Optional pseudo-element to add a secondary color glow */
-.glowing-border::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0; bottom: 0;
-    border-radius: 50%;
-    background: radial-gradient(circle at center, rgba(139, 92, 246, 0.6) 0%, transparent 60%);
-    animation: pulseGlowSecondary 6s ease-in-out infinite alternate-reverse;
-    z-index: -1;
-}
-
-@keyframes pulseGlow {
+@keyframes subtlePulse {
     0% {
-        transform: scale(0.95);
-        opacity: 0.7;
-        box-shadow: 0 0 30px rgba(59, 130, 246, 0.2);
+        transform: scale(0.98);
+        opacity: 0.8;
     }
     100% {
-        transform: scale(1.05);
+        transform: scale(1.02);
         opacity: 1;
-        box-shadow: 0 0 80px rgba(59, 130, 246, 0.6);
-    }
-}
-
-@keyframes pulseGlowSecondary {
-    0% {
-        transform: scale(0.9) rotate(0deg);
-        opacity: 0.5;
-    }
-    100% {
-        transform: scale(1.1) rotate(45deg);
-        opacity: 0.9;
     }
 }
 
@@ -426,7 +402,6 @@ section {
     display: block;
     position: relative;
     z-index: 1;
-    /* Removed counterRotate since the parent is no longer spinning */
 }
 
 .stats-panel {
