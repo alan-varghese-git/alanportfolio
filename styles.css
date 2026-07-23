@@ -372,6 +372,9 @@ section {
     border-radius: 50%;
     background: linear-gradient(45deg, var(--primary-color), transparent);
     animation: rotateGlow 5s linear infinite;
+    will-change: transform;
+    mask-image: radial-gradient(circle, rgba(0,0,0,1) 60%, rgba(0,0,0,0) 100%);
+    -webkit-mask-image: radial-gradient(circle, rgba(0,0,0,1) 60%, rgba(0,0,0,0) 100%);
     width: 320px;
     height: 320px;
     display: flex;
@@ -1181,6 +1184,8 @@ input:checked+.slider:before {
         align-items: center !important;
         justify-content: center !important;
         margin: 5px auto 16px auto !important;
+        animation: rotateGlow 5s linear infinite !important;
+        will-change: transform;
     }
 
     .profile-img {
@@ -1191,6 +1196,7 @@ input:checked+.slider:before {
         height: 100% !important;
         border-radius: 50% !important;
         object-fit: cover !important;
+        animation: counterRotate 5s linear infinite !important;
     }
 
     /* Reduce spacing above section headings */
