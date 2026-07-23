@@ -306,11 +306,6 @@ document.addEventListener('DOMContentLoaded', () => {
             loginPopup.classList.add('active');
             loginError.style.display = 'none';
 
-            // Remove readonly protection right when user actively opens the modal
-            setTimeout(() => {
-                document.getElementById('admin-email').removeAttribute('readonly');
-                document.getElementById('admin-password').removeAttribute('readonly');
-            }, 150);
         }
     });
 
@@ -1259,21 +1254,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-// Ensure clicking email input explicitly focuses email without bubbling or interference
-const emailInput = document.getElementById('admin-email');
-const passwordInput = document.getElementById('admin-password');
 
-if (emailInput && passwordInput) {
-    emailInput.addEventListener('click', (e) => {
-        e.stopPropagation();
-        emailInput.focus();
-    });
-
-    passwordInput.addEventListener('click', (e) => {
-        e.stopPropagation();
-        passwordInput.focus();
-    });
-}
 
 
 
