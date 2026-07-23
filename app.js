@@ -58,20 +58,6 @@ window.addEventListener('beforeunload', () => {
 
 document.addEventListener('DOMContentLoaded', () => {
 
-    // 1. Instant Cache Reading
-    const cachedData = localStorage.getItem('portfolio_cache');
-    if (cachedData) {
-        try {
-            const data = JSON.parse(cachedData);
-            // We use setTimeout to ensure all other DOM queries/functions are initialized
-            setTimeout(() => {
-                applyPortfolioState(data);
-            }, 0);
-        } catch (e) {
-            console.error("Error parsing cached portfolio data:", e);
-        }
-    }
-
     window.scrollTo(0, 0);
     // Clear any URL hash on initial load to prevent browser jump behavior
     if (window.location.hash && history.replaceState) {
@@ -1311,4 +1297,23 @@ function updateProfileImage(url) {
         img.src = url;
     }
 }
+
+// ---------------------------------------------------------
+// ZERO-DELAY CACHE RENDERING (IIFE)
+// ---------------------------------------------------------
+// This immediately parses and renders the local storage cache synchronously 
+// as the script evaluates, completely eliminating any empty flashes before 
+// DOMContentLoaded or Firebase responses.
+(function () {
+    const cachedData = localStorage.getItem('portfolio_cache');
+    if (cachedData) {
+        try {
+            const data = JSON.parse(cachedData);
+            // Render synchronously without setTimeout delay
+            applyPortfolioState(data);
+        } catch (e) {
+            console.error("Error parsing cached portfolio data:", e);
+        }
+    }
+})();
 
