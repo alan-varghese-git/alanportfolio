@@ -1458,3 +1458,16 @@ input:checked+.slider:before {
         font-size: 0.8rem !important;
     }
 }
+
+
+/* Prevent hidden state delay on mobile viewports */
+@media (max-width: 768px) {
+    .hero-section *, 
+    .hero-profile-container, 
+    .glass-card {
+        opacity: 1 !important;
+        visibility: visible !important;
+        transform: none !important;
+        transition: none !important;
+    }
+}
