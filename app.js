@@ -333,60 +333,17 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    function closeAdminPanel() {
-        adminPanel.classList.remove('open');
-        adminPanel.style.transform = 'translate(-50%, -50%) scale(0.95)';
-    }
+    
 
     logoTrigger.addEventListener('click', (e) => {
-        e.stopPropagation();
-        if (isAuthenticated) {
-            const isOpen = adminPanel.classList.toggle('open');
-
-            if (isOpen) {
-                adminPanel.style.transform = 'translate(-50%, -50%) scale(1)';
-                adminPanel.style.left = '50%';
-                adminPanel.style.top = '50%';
-            } else {
-                adminPanel.style.transform = 'translate(-50%, -50%) scale(0.95)';
-            }
-        } else {
-            loginPopup.classList.add('active');
-            loginError.style.display = 'none';
-
-            // Remove readonly protection right when user actively opens the modal
-            setTimeout(() => {
-                document.getElementById('admin-email').removeAttribute('readonly');
-                document.getElementById('admin-password').removeAttribute('readonly');
-            }, 150);
-        }
-    });
-
-    loginForm.addEventListener('submit', (e) => {
         e.preventDefault();
-        const email = document.getElementById('admin-email').value;
-        const password = document.getElementById('admin-password').value;
-
-        auth.signInWithEmailAndPassword(email, password)
-            .then(() => {
-                loginPopup.classList.remove('active');
-                loginForm.reset();
-                // Open panel on login
-                adminPanel.classList.add('open');
-                document.body.classList.add('admin-mode');
-                adminPanel.style.transform = 'translate(-50%, -50%) scale(1)';
-                adminPanel.style.left = '50%';
-                adminPanel.style.top = '50%';
-            })
-            .catch((error) => {
-                loginError.textContent = "Invalid email or password";
-                loginError.style.display = 'block';
-            });
+        window.location.href = "admin.html";
     });
 
-    logoutBtn.addEventListener('click', () => {
-        auth.signOut();
+    
     });
+
+    
 
     closeAdminBtn.addEventListener('click', closeAdminPanel);
 
