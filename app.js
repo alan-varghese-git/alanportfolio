@@ -248,8 +248,11 @@ document.addEventListener('DOMContentLoaded', () => {
             const hideLoader = () => {
                 setTimeout(() => {
                     document.body.classList.add('app-loaded');
-                    const loader = document.getElementById('global-loader');
-                    if (loader) loader.style.display = 'none';
+                    const loader = document.getElementById('page-loader');
+                    if (loader) {
+                        loader.style.opacity = '0';
+                        setTimeout(() => loader.style.display = 'none', 400);
+                    }
                     const mainContent = document.querySelector('.container');
                     if (mainContent) mainContent.style.opacity = '1';
                 }, 300);
