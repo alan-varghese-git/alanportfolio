@@ -43,6 +43,17 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
+
+// Enable offline persistence so Firebase data loads instantly from local cache
+db.enablePersistence({ synchronizeTabs: true })
+  .catch((err) => {
+      if (err.code == 'failed-precondition') {
+          console.log('Multiple tabs open, persistence can only be enabled in one tab at a time.');
+      } else if (err.code == 'unimplemented') {
+          console.log('The current browser does not support all of the features required to enable persistence');
+      }
+  });
+
 const storage = firebase.storage();
 storage.setMaxUploadRetryTime(15000); // 15 seconds (default is 10 minutes)
 let isAuthenticated = false;
