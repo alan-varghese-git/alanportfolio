@@ -211,9 +211,12 @@ document.addEventListener('DOMContentLoaded', () => {
     popupTriggers.forEach(btn => {
         btn.addEventListener('click', (e) => {
             e.preventDefault();
-            if (!popupsToggle.checked) return; // Respect Admin setting
+            if (popupsToggle && !popupsToggle.checked) return; // Respect Admin setting
             const targetId = btn.dataset.target;
-            document.getElementById(targetId).classList.add('active');
+            if (targetId) {
+                const targetEl = document.getElementById(targetId);
+                if (targetEl) targetEl.classList.add('active');
+            }
         });
     });
 
@@ -249,7 +252,6 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             isAuthenticated = false;
             document.body.classList.remove('admin-mode'); // Disable editing only on logout
-            closeAdminPanel();
         }
 
         if (!initialLoadComplete) {
