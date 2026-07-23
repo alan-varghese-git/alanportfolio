@@ -33,6 +33,9 @@ body {
     overflow-x: hidden;
     scroll-behavior: smooth;
     min-height: 100vh;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease-in;
 }
 
 /* Global Typography Scale & Weights */
