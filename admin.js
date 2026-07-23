@@ -40,13 +40,22 @@ const firebaseConfig = {
     appId: "1:473600126183:web:b4f1aaf7e1d2fc2ce98642"
 };
 
-// firebase
-const auth = { onAuthStateChanged: (cb) => { cb(null); } };
-const db = null;
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
 
-// Disabled for public site
+// Enable offline persistence so Firebase data loads instantly from local cache
+db.enablePersistence({ synchronizeTabs: true })
+  .catch((err) => {
+      if (err.code == 'failed-precondition') {
+          console.log('Multiple tabs open, persistence can only be enabled in one tab at a time.');
+      } else if (err.code == 'unimplemented') {
+          console.log('The current browser does not support all of the features required to enable persistence');
+      }
+  });
 
-// storage removed
+const storage = firebase.storage();
+storage.setMaxUploadRetryTime(15000); // 15 seconds (default is 10 minutes)
 let isAuthenticated = false;
 
 window.addEventListener('beforeunload', () => {
@@ -705,12 +714,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 renderTile(currentEditingTile);
                 largeTileEditPopup.classList.remove('active');
 
-                // 2. Firestore Block
+                // 2. GitHub Block
                 try {
-                    await savePortfolioStateToFirestore();
+                    await savePortfolioStateToGitHub();
                 } catch (error) {
                     console.error("Save failed:", error);
-                    alert("Firestore Error: " + error.code);
+                    alert("GitHub Error: " + error.message);
                 }
             } catch (fatalError) {
                 console.error("Fatal Save Error:", fatalError);
@@ -916,7 +925,7 @@ document.addEventListener('DOMContentLoaded', () => {
         tile.addEventListener('click', handleTileClick);
     }
 
-    function savePortfolioStateToFirestore() {
+    async function savePortfolioStateToGitHub() {
         // Collect edits
         const edits = [];
         editableElements.forEach((el, index) => {
@@ -930,7 +939,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const titleEl = sec.querySelector('.section-header h2');
             const titleId = titleEl ? titleEl.id : null;
             const isDynamic = sec.classList.contains('dynamic-section');
-            const isExpertise = sec.classList.contains('expertise-section'); // to know what type of tiles to generate
+            const isExpertise = sec.classList.contains('expertise-section'); 
             const grid = sec.querySelector('.glass-grid');
             const gridId = grid ? grid.id : null;
             
@@ -979,19 +988,54 @@ document.addEventListener('DOMContentLoaded', () => {
             edits: edits,
             sections: sectionsData,
             layouts: layouts,
-            photoUrl: profileImg.src.startsWith('data:') ? profileImg.src : null
+            photoUrl: profileImg.src.startsWith('data:') ? profileImg.src : null,
+            tilesData: tilesData
         };
 
-        const batch = db.batch();
-        const settingsRef = db.collection('settings').doc('portfolio_settings');
-        batch.set(settingsRef, state, { merge: true });
+        let githubToken = sessionStorage.getItem('github_pat');
+        if (!githubToken) {
+            githubToken = prompt("Enter your GitHub Personal Access Token to publish to data.json:");
+            if (!githubToken) return;
+            sessionStorage.setItem('github_pat', githubToken);
+        }
 
-        tilesData.forEach(tData => {
-            const tileRef = db.collection('tiles').doc(tData.id);
-            batch.set(tileRef, tData, { merge: true });
-        });
+        const repoOwner = "alan-varghese-git";
+        const repoName = "alanportfolio";
+        const urlJson = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/data.json`;
 
-        return batch.commit();
+        try {
+            let shaJson = null;
+            const getResJson = await fetch(urlJson, { headers: { "Authorization": `token ${githubToken}` } });
+            if (getResJson.ok) {
+                const jsonData = await getResJson.json();
+                shaJson = jsonData.sha;
+            }
+            
+            const base64Json = btoa(unescape(encodeURIComponent(JSON.stringify(state, null, 2))));
+            const putResJson = await fetch(urlJson, {
+                method: "PUT",
+                headers: {
+                    "Authorization": `token ${githubToken}`,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    message: "Update CMS state data.json",
+                    content: base64Json,
+                    sha: shaJson
+                })
+            });
+
+            if (putResJson.ok) {
+                return true;
+            } else {
+                if (putResJson.status === 401 || putResJson.status === 403) {
+                    sessionStorage.removeItem('github_pat'); 
+                }
+                throw new Error("Failed to push data.json to GitHub.");
+            }
+        } catch (error) {
+            throw error;
+        }
     }
 
     const addSectionBtn = document.getElementById('add-section-btn');
@@ -1003,23 +1047,29 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     const saveBtn = document.getElementById('save-btn');
-    saveBtn.addEventListener('click', () => {
-        savePortfolioStateToFirestore().then(() => {
+    if (saveBtn) {
+        saveBtn.addEventListener('click', async () => {
             const originalText = saveBtn.innerText;
-            saveBtn.innerText = "Saved!";
-            saveBtn.style.backgroundColor = '#10b981';
-            setTimeout(() => {
+            saveBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Publishing...';
+            saveBtn.disabled = true;
+
+            try {
+                await savePortfolioStateToGitHub();
+                saveBtn.innerHTML = '<i class="fa-solid fa-check"></i> Published!';
+                saveBtn.style.backgroundColor = '#10b981'; // Success green
+                setTimeout(() => {
+                    saveBtn.innerText = originalText;
+                    saveBtn.style.backgroundColor = '';
+                    saveBtn.disabled = false;
+                }, 2000);
+            } catch (error) {
+                console.error("Save error:", error);
+                alert("Error saving: " + error.message);
                 saveBtn.innerText = originalText;
-                saveBtn.style.backgroundColor = '';
-            }, 2000);
-        }).catch(error => {
-            console.error("Error saving state to Firestore:", error);
-            alert(`Firestore Error: ${error.code} - ${error.message}`);
-            saveBtn.innerText = "Error!";
+                saveBtn.disabled = false;
+            }
         });
-    });
-
-
+    }
 
     // Load state
     function loadState() {
