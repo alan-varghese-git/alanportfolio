@@ -312,11 +312,15 @@
         <div class="glass-popup login-modal">
             <button class="close-popup"><i class="fa-solid fa-xmark"></i></button>
             <h2 class="admin-modal-title">Admin Login</h2>
-            <form class="login-form" id="login-form">
-                <input type="email" id="admin-email" placeholder="Email" class="glass-input" autocomplete="username" readonly onfocus="this.removeAttribute('readonly');" onclick="handleAdminEmailClick();" required>
-                <input type="password" id="admin-password" placeholder="Password" class="glass-input" autocomplete="current-password" style="display:none;" required>
+            <form class="login-form" id="login-form" autocomplete="off">
+                <div class="input-group">
+                    <input type="email" id="admin-email" name="admin_email_fake" placeholder="Email" class="glass-input" autocomplete="off" required>
+                </div>
+                <div class="input-group" style="margin-top: 15px;">
+                    <input type="password" id="admin-password" name="admin_pass_fake" placeholder="Password" class="glass-input" autocomplete="new-password" required>
+                </div>
                 <p id="login-error" class="error-msg" style="display: none; color: #ef4444; font-size: 12px;"></p>
-                <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 10px;">Login</button>
+                <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 20px;">Login</button>
             </form>
         </div>
     </div>

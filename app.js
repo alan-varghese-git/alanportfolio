@@ -1263,11 +1263,19 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-// Only reveal/enable password field when the user explicitly clicks/interacts with the admin login trigger
-function handleAdminEmailClick() {
-    const passwordField = document.getElementById('admin-password');
-    if (passwordField) {
-        passwordField.style.display = 'block';
-        passwordField.focus();
-    }
+// Ensure clicking email input explicitly focuses email without bubbling or interference
+const emailInput = document.getElementById('admin-email');
+const passwordInput = document.getElementById('admin-password');
+
+if (emailInput && passwordInput) {
+    emailInput.addEventListener('click', (e) => {
+        e.stopPropagation();
+        emailInput.focus();
+    });
+
+    passwordInput.addEventListener('click', (e) => {
+        e.stopPropagation();
+        passwordInput.focus();
+    });
 }
+
