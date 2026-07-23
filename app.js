@@ -1317,3 +1317,14 @@ window.addEventListener('pageshow', function(event) {
         window.location.reload();
     }
 });
+
+
+// Verify image loading status on DOMContentLoaded
+document.addEventListener('DOMContentLoaded', () => {
+    const img = document.getElementById('profile-photo');
+    if (img) {
+        img.src = window.location.hostname.includes('github.io') 
+            ? '/alanportfolio/assets/profile-photo.jpg' 
+            : './assets/profile-photo.jpg';
+    }
+});

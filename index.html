@@ -83,7 +83,7 @@
 
             <div class="hero-image-wrapper hero-load-animate hero-load-delay-5">
                 <div class="glowing-border">
-                    <img src="./assets/profile-photo.jpg" alt="Alan Varghese" id="profile-photo" class="profile-img" decoding="sync" loading="eager" onerror="this.onerror=null; this.src='profile-photo.jpg';">
+                    <img id="profile-photo" src="./assets/profile-photo.jpg" alt="Alan Varghese" class="profile-img" loading="eager" fetchpriority="high" decoding="async" onerror="this.onerror=null; this.src='profile-photo.jpg'; console.log('Retrying secondary image path');">
                 </div>
             </div>
         </section>
