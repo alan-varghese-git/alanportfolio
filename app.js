@@ -393,7 +393,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Profile Photo Upload
     const uploadPhoto = document.getElementById('upload-photo');
-    const profileImg = document.getElementById('profile-photo');
+    const profileImg = document.getElementById('main-profile-img');
     uploadPhoto.addEventListener('change', (e) => {
         const file = e.target.files[0];
         if (file) {
@@ -1081,11 +1081,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         // Apply fallback for profile photo if missing or empty
-        if (savedPhotoUrl && savedPhotoUrl.startsWith('data:')) {
-            profileImg.src = savedPhotoUrl;
-        } else if (savedPhotoUrl && savedPhotoUrl.startsWith('http')) {
-            profileImg.src = savedPhotoUrl;
-        }
+        updateProfileImage(savedPhotoUrl);
     }
 
     // Load state
@@ -1322,12 +1318,10 @@ window.addEventListener('pageshow', function(event) {
 });
 
 
-// Verify image loading status on DOMContentLoaded
-document.addEventListener('DOMContentLoaded', () => {
-    const img = document.getElementById('profile-photo');
-    if (img) {
-        img.src = window.location.hostname.includes('github.io') 
-            ? '/alanportfolio/assets/profile-photo.jpg' 
-            : './assets/profile-photo.jpg';
+// Safe DOM update wrapper for Firebase data
+function updateProfileImage(url) {
+    const img = document.getElementById('main-profile-img');
+    if (img && url && (url.startsWith('http') || url.startsWith('data:'))) {
+        img.src = url;
     }
-});
+}
