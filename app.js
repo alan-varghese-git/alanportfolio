@@ -42,17 +42,6 @@ const firebaseConfig = {
 
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
-const db = firebase.firestore();
-
-// Enable offline persistence so Firebase data loads instantly from local cache
-db.enablePersistence({ synchronizeTabs: true })
-  .catch((err) => {
-      if (err.code == 'failed-precondition') {
-          console.log('Multiple tabs open, persistence can only be enabled in one tab at a time.');
-      } else if (err.code == 'unimplemented') {
-          console.log('The current browser does not support all of the features required to enable persistence');
-      }
-  });
 
 const storage = firebase.storage();
 storage.setMaxUploadRetryTime(15000); // 15 seconds (default is 10 minutes)
@@ -921,7 +910,7 @@ document.addEventListener('DOMContentLoaded', () => {
         tile.addEventListener('click', handleTileClick);
     }
 
-    function savePortfolioStateToFirestore() {
+    async function savePortfolioStateToGitHub() {
         // Collect edits
         const edits = [];
         editableElements.forEach((el, index) => {
@@ -984,19 +973,63 @@ document.addEventListener('DOMContentLoaded', () => {
             edits: edits,
             sections: sectionsData,
             layouts: layouts,
-            photoUrl: profileImg.src.startsWith('data:') ? profileImg.src : null
+            photoUrl: profileImg.src.startsWith('data:') ? profileImg.src : null,
+            tilesData: tilesData
         };
 
-        const batch = db.batch();
-        const settingsRef = db.collection('settings').doc('portfolio_settings');
-        batch.set(settingsRef, state, { merge: true });
+        let githubToken = sessionStorage.getItem('github_pat');
+        if (!githubToken) {
+            githubToken = prompt("Enter your GitHub Personal Access Token to save changes to data.json:");
+            if (!githubToken) return Promise.reject(new Error("No GitHub PAT provided"));
+            sessionStorage.setItem('github_pat', githubToken);
+        }
 
-        tilesData.forEach(tData => {
-            const tileRef = db.collection('tiles').doc(tData.id);
-            batch.set(tileRef, tData, { merge: true });
-        });
+        const repoOwner = "alan-varghese-git";
+        const repoName = "alanportfolio";
+        const filePath = "data.json";
+        const url = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${filePath}`;
 
-        return batch.commit();
+        try {
+            // 1. Get current file SHA
+            const getRes = await fetch(url, {
+                headers: { "Authorization": `token ${githubToken}` }
+            });
+            let sha = null;
+            if (getRes.ok) {
+                const fileData = await getRes.json();
+                sha = fileData.sha;
+            }
+
+            // 2. Push updated commit
+            const contentString = JSON.stringify(state, null, 2);
+            // Safe Base64 encoding for Unicode
+            const base64Content = btoa(unescape(encodeURIComponent(contentString)));
+            
+            const putRes = await fetch(url, {
+                method: "PUT",
+                headers: {
+                    "Authorization": `token ${githubToken}`,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    message: "Update portfolio content via Admin panel",
+                    content: base64Content,
+                    sha: sha
+                })
+            });
+
+            if (putRes.ok) {
+                return true;
+            } else {
+                if (putRes.status === 401 || putRes.status === 403) {
+                    sessionStorage.removeItem('github_pat'); // clear invalid token
+                }
+                const errorData = await putRes.json();
+                throw new Error(errorData.message || "Failed to push to GitHub");
+            }
+        } catch (error) {
+            throw error;
+        }
     }
 
     const addSectionBtn = document.getElementById('add-section-btn');
@@ -1009,7 +1042,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const saveBtn = document.getElementById('save-btn');
     saveBtn.addEventListener('click', () => {
-        savePortfolioStateToFirestore().then(() => {
+        savePortfolioStateToGitHub().then(() => {
             const originalText = saveBtn.innerText;
             saveBtn.innerText = "Saved!";
             saveBtn.style.backgroundColor = '#10b981';
@@ -1018,8 +1051,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 saveBtn.style.backgroundColor = '';
             }, 2000);
         }).catch(error => {
-            console.error("Error saving state to Firestore:", error);
-            alert(`Firestore Error: ${error.code} - ${error.message}`);
+            console.error("Error saving state to GitHub:", error);
+            alert(`Save Error: ${error.message}`);
             saveBtn.innerText = "Error!";
         });
     });
@@ -1027,20 +1060,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // Load state
-    function loadState() {
-        return Promise.all([
-            db.collection('settings').doc('portfolio_settings').get(),
-            db.collection('tiles').get()
-        ]).then(([settingsDoc, tilesSnapshot]) => {
-            if (settingsDoc.exists) {
-                const state = settingsDoc.data();
+    async function loadState() {
+        try {
+            const response = await fetch('./data.json?t=' + new Date().getTime());
+            if (!response.ok) return;
+            const state = await response.json();
+            
+            if (Object.keys(state).length === 0) return; // empty data.json
 
-                // Dynamically stitch the separated tiles back into the state object
-                const fetchedTiles = [];
-                tilesSnapshot.forEach(doc => {
-                    fetchedTiles.push(doc.data());
-                });
-                state.tilesData = fetchedTiles;
+            if (state) {
 
                 // Restore theme
                 document.documentElement.style.setProperty('--primary-color', state.themeColor);
