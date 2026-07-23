@@ -18,7 +18,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 
-<body>
+<body><canvas id="particle-canvas" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none;"></canvas>
 
     <!-- Background Canvas -->
     <canvas id="bg-canvas"></canvas>
@@ -99,24 +99,44 @@
         <section id="expertise" class="expertise-section">
             <div class="section-header">
                 <h2 data-editable="true" id="edit-title-expertise">My Expertise</h2>
+                <div class="layout-controls admin-only" data-target="expertise-grid" style="display: none;">
+                    <button class="btn-icon active" data-layout="grid"><i class="fa-solid fa-border-all"></i></button>
+                    <button class="btn-icon" data-layout="list"><i class="fa-solid fa-list"></i></button>
+                </div>
             </div>
-            <div id="expertise-container" class="expertise-grid glass-grid layout-grid grid"></div>
+
+            <div class="glass-grid expertise-grid layout-grid grid" id="expertise-grid">
+            </div>
         </section>
 
         <!-- 3. Projects Section -->
         <section id="projects" class="projects-section">
             <div class="section-header">
                 <h2 data-editable="true" id="edit-title-proj">Projects</h2>
+                <div class="layout-controls admin-only" data-target="proj-grid" style="display: none;">
+                    <button class="btn-icon active" data-layout="grid"><i class="fa-solid fa-border-all"></i></button>
+                    <button class="btn-icon" data-layout="stack"><i class="fa-solid fa-layer-group"></i></button>
+                    <button class="btn-icon" data-layout="carousel"><i class="fa-solid fa-images"></i></button>
+                </div>
             </div>
-            <div id="projects-container" class="projects-grid glass-grid layout-grid grid"></div>
+
+            <div class="glass-grid layout-grid proj-grid grid" id="proj-grid">
+            </div>
         </section>
 
         <!-- 4. Experiences & Certifications -->
         <section id="experiences" class="experiences-section">
             <div class="section-header">
                 <h2 data-editable="true" id="edit-title-exp">Experiences & Certifications</h2>
+                <div class="layout-controls admin-only" data-target="exp-grid" style="display: none;">
+                    <button class="btn-icon active" data-layout="grid"><i class="fa-solid fa-border-all"></i></button>
+                    <button class="btn-icon" data-layout="stack"><i class="fa-solid fa-layer-group"></i></button>
+                    <button class="btn-icon" data-layout="carousel"><i class="fa-solid fa-images"></i></button>
+                </div>
             </div>
-            <div id="certifications-container" class="certifications-grid glass-grid layout-grid grid"></div>
+
+            <div class="glass-grid layout-grid exp-grid grid" id="exp-grid">
+            </div>
         </section>
 
         <!-- 5. Publications Section -->
@@ -314,7 +334,13 @@
         style="display:none; position: fixed; right: 20px; top: 50%; transform: translateY(-50%); z-index: 1000;"><i
             class="fa-solid fa-gear"></i></button>
 
-    <script src="app.js?v=20260723v4" defer></script>
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-storage-compat.js"></script>
+
+    <script src="app.js?v=20260723v2" defer></script>
 </body>
 
 </html>

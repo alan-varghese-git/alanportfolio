@@ -40,13 +40,22 @@ const firebaseConfig = {
     appId: "1:473600126183:web:b4f1aaf7e1d2fc2ce98642"
 };
 
-// firebase
-const auth = { onAuthStateChanged: (cb) => { cb(null); } };
-const db = null;
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
 
-// Disabled for public site
+// Enable offline persistence so Firebase data loads instantly from local cache
+db.enablePersistence({ synchronizeTabs: true })
+  .catch((err) => {
+      if (err.code == 'failed-precondition') {
+          console.log('Multiple tabs open, persistence can only be enabled in one tab at a time.');
+      } else if (err.code == 'unimplemented') {
+          console.log('The current browser does not support all of the features required to enable persistence');
+      }
+  });
 
-// storage removed
+const storage = firebase.storage();
+storage.setMaxUploadRetryTime(15000); // 15 seconds (default is 10 minutes)
 let isAuthenticated = false;
 
 window.addEventListener('beforeunload', () => {
@@ -211,12 +220,9 @@ document.addEventListener('DOMContentLoaded', () => {
     popupTriggers.forEach(btn => {
         btn.addEventListener('click', (e) => {
             e.preventDefault();
-            if (popupsToggle && !popupsToggle.checked) return; // Respect Admin setting
+            if (!popupsToggle.checked) return; // Respect Admin setting
             const targetId = btn.dataset.target;
-            if (targetId) {
-                const targetEl = document.getElementById(targetId);
-                if (targetEl) targetEl.classList.add('active');
-            }
+            document.getElementById(targetId).classList.add('active');
         });
     });
 
@@ -252,100 +258,79 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             isAuthenticated = false;
             document.body.classList.remove('admin-mode'); // Disable editing only on logout
+            closeAdminPanel();
         }
 
         if (!initialLoadComplete) {
             initialLoadComplete = true;
 
-                function applyState(data) {
-        if (!data) return;
 
-        // 1. Global Settings
-        if (data.themeColor) {
-            document.documentElement.style.setProperty('--primary-color', data.themeColor);
-        }
-        // Background animation toggle (if any)
-        if (typeof animationType !== 'undefined' && data.bgAnimation) {
-            animationType = data.bgAnimation;
-        }
 
-        // 2. Inline Text Edits
-        if (data.edits) {
-            const savedEdits = {};
-            data.edits.forEach(edit => {
-                savedEdits[edit.id] = edit.html;
-            });
-            document.querySelectorAll('[data-editable="true"]').forEach(el => {
-                if (el.id && savedEdits[el.id] !== undefined) {
-                    if (el.innerHTML !== savedEdits[el.id]) {
-                        el.innerHTML = savedEdits[el.id];
-                    }
-                }
-            });
+            // Quietly fetch Firebase data in the background
+            try {
+                loadState().catch(error => {
+                    console.error("Firebase load error:", error);
+                });
+            } catch (err) {
+                console.error("Synchronous error during loadState:", err);
+            }
         }
+    });
 
-        // 3. Simple Array Render Loops
-        const projectContainer = document.getElementById('projects-container');
-        if (projectContainer && data.projects) {
-            projectContainer.innerHTML = data.projects.map(p => `
-                <div class="glass-tile scroll-animate">
-                    <h3 style="color: var(--primary-color); margin-bottom: 10px;">${p.title}</h3>
-                    <p style="color: var(--text-secondary); font-size: 14px; line-height: 1.5;">${p.description}</p>
-                </div>
-            `).join('');
-        }
-
-        const expertiseContainer = document.getElementById('expertise-container');
-        if (expertiseContainer && data.expertise) {
-            expertiseContainer.innerHTML = data.expertise.map(e => `
-                <div class="glass-tile scroll-animate">
-                    <h3 style="color: var(--primary-color); margin-bottom: 10px;">${e.title}</h3>
-                    <p style="color: var(--text-secondary); font-size: 14px; line-height: 1.5;">${e.description}</p>
-                </div>
-            `).join('');
-        }
-
-        const certContainer = document.getElementById('certifications-container');
-        if (certContainer && data.certifications) {
-            certContainer.innerHTML = data.certifications.map(c => `
-                <div class="glass-tile scroll-animate">
-                    <h3 style="color: var(--primary-color); margin-bottom: 10px;">${c.title}</h3>
-                    <p style="color: var(--text-secondary); font-size: 14px; line-height: 1.5;">${c.issuer}</p>
-                </div>
-            `).join('');
-        }
+    function closeAdminPanel() {
+        adminPanel.classList.remove('open');
+        adminPanel.style.transform = 'translate(-50%, -50%) scale(0.95)';
     }
 
-            function loadState() {
-                const isGitHubPages = window.location.hostname.includes("github.io");
-                const jsonPath = isGitHubPages ? "/alanportfolio/data.json" : "./data.json";
-                return fetch(jsonPath + '?t=' + new Date().getTime())
-                    .then(res => res.json())
-                    .then(data => {
-                        applyState(data);
-                        window.dispatchEvent(new Event('resize'));
-                        if (window.location.hash) {
-                            const el = document.querySelector(window.location.hash);
-                            if (el) el.scrollIntoView();
-                        }
-                    })
-                    .catch(error => console.error("Local JSON load error:", error));
+    logoTrigger.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (isAuthenticated) {
+            const isOpen = adminPanel.classList.toggle('open');
+
+            if (isOpen) {
+                adminPanel.style.transform = 'translate(-50%, -50%) scale(1)';
+                adminPanel.style.left = '50%';
+                adminPanel.style.top = '50%';
+            } else {
+                adminPanel.style.transform = 'translate(-50%, -50%) scale(0.95)';
             }
-            loadState();
+        } else {
+            loginPopup.classList.add('active');
+            loginError.style.display = 'none';
+
+            // Remove readonly protection right when user actively opens the modal
+            setTimeout(() => {
+                document.getElementById('admin-email').removeAttribute('readonly');
+                document.getElementById('admin-password').removeAttribute('readonly');
+            }, 150);
         }
     });
 
-    
-
-    logoTrigger.addEventListener('click', (e) => {
+    loginForm.addEventListener('submit', (e) => {
         e.preventDefault();
-        window.location.href = "admin.html";
+        const email = document.getElementById('admin-email').value;
+        const password = document.getElementById('admin-password').value;
+
+        auth.signInWithEmailAndPassword(email, password)
+            .then(() => {
+                loginPopup.classList.remove('active');
+                loginForm.reset();
+                // Open panel on login
+                adminPanel.classList.add('open');
+                document.body.classList.add('admin-mode');
+                adminPanel.style.transform = 'translate(-50%, -50%) scale(1)';
+                adminPanel.style.left = '50%';
+                adminPanel.style.top = '50%';
+            })
+            .catch((error) => {
+                loginError.textContent = "Invalid email or password";
+                loginError.style.display = 'block';
+            });
     });
 
-    
+    logoutBtn.addEventListener('click', () => {
+        auth.signOut();
     });
-
-    
 
     closeAdminBtn.addEventListener('click', closeAdminPanel);
 
@@ -1290,3 +1275,84 @@ function updateProfileImage(url) {
         img.src = url;
     }
 }
+// Particle Canvas Background
+document.addEventListener("DOMContentLoaded", () => {
+    const canvas = document.getElementById('particle-canvas');
+    if (canvas) {
+        const ctx = canvas.getContext('2d');
+        
+        let particles = [];
+        const numParticles = 100;
+        
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            initParticles();
+        }
+        
+        window.addEventListener('resize', resizeCanvas);
+        
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.vx = (Math.random() - 0.5) * 0.5;
+                this.vy = (Math.random() - 0.5) * 0.5;
+                this.radius = Math.random() * 2 + 1;
+            }
+            
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                
+                if (this.x < 0 || this.x > canvas.width) this.vx *= -1;
+                if (this.y < 0 || this.y > canvas.height) this.vy *= -1;
+            }
+            
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+                ctx.fill();
+            }
+        }
+        
+        function initParticles() {
+            particles = [];
+            for (let i = 0; i < numParticles; i++) {
+                particles.push(new Particle());
+            }
+        }
+        
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+            
+            // Draw lines between close particles
+            for (let i = 0; i < particles.length; i++) {
+                for (let j = i + 1; j < particles.length; j++) {
+                    const dx = particles[i].x - particles[j].x;
+                    const dy = particles[i].y - particles[j].y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (dist < 100) {
+                        ctx.beginPath();
+                        ctx.moveTo(particles[i].x, particles[i].y);
+                        ctx.lineTo(particles[j].x, particles[j].y);
+                        ctx.strokeStyle = `rgba(255, 255, 255, ${0.2 - dist/500})`;
+                        ctx.stroke();
+                    }
+                }
+            }
+            
+            requestAnimationFrame(animateParticles);
+        }
+        
+        resizeCanvas();
+        animateParticles();
+    }
+});
