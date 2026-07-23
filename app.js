@@ -259,11 +259,10 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 loadState().catch(error => {
                         console.error("Firebase load error:", error);
-
                     });
-
-
-        }
+            } catch (err) {
+                console.error("Synchronous error during loadState:", err);
+            }        }
     });
 
     function closeAdminPanel() {
