@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AlanPortfolio</title>
+    <link rel="stylesheet" href="styles.css">
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div id="global-loader" class="global-loader">
+        <div class="nav-logo pulsing-logo">Alan<span class="accent-dot">.</span></div>
+    </div>
+
+    <!-- Background Canvas -->
+    <canvas id="bg-canvas"></canvas>
+
+    <!-- Navigation Bar -->
+    <nav class="glass-nav">
+        <div class="nav-logo" id="logo-trigger" style="cursor: pointer;">Alan<span class="accent-dot">.</span></div>
+        <ul class="nav-links">
+            <li><a href="#home">Home</a></li>
+            <li><a href="#about-section">About</a></li>
+            <li><a href="#expertise">Skills</a></li>
+            <li><a href="#projects">Projects</a></li>
+            <li><a href="#experiences">Certifications</a></li>
+        </ul>
+        <button class="btn btn-primary popup-trigger" data-target="contact-popup">Contact</button>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container">
+
+        <!-- 1. Hero Section -->
+        <section id="home" class="hero-section">
+            <div class="hero-content">
+                <h1 class="hero-greeting hero-load-animate hero-load-delay-1" data-editable="true" id="edit-hero-greet"></h1>
+                <h2 class="hero-name hero-load-animate hero-load-delay-2" data-editable="true" id="edit-hero-name"></h2>
+                <p class="hero-title hero-load-animate hero-load-delay-3" data-editable="true" id="edit-hero-title"></p>
+                <p class="hero-desc hero-load-animate hero-load-delay-4" data-editable="true" id="edit-hero-desc"
+                    style="color: var(--text-secondary); margin-bottom: 30px; font-size: 16px; line-height: 1.6; max-width: 600px;">
+                </p>
+
+                <div class="hero-actions hero-load-animate hero-load-delay-4">
+                    <div class="social-icons">
+                        <a href="https://www.instagram.com/_.a.l.a.n._.__" target="_blank" class="glass-icon"><i
+                                class="fa-brands fa-instagram"></i></a>
+                        <a href="https://www.linkedin.com/in/alan-vj" target="_blank" class="glass-icon"><i
+                                class="fa-brands fa-linkedin-in"></i></a>
+                        <a href="https://github.com/alan-varghese-git" target="_blank" class="glass-icon"><i
+                                class="fa-brands fa-github"></i></a>
+                    </div>
+                    <div class="cta-buttons">
+                        <button class="btn btn-outline" data-editable="true" id="edit-btn-cv"></button>
+                    </div>
+                </div>
+
+                <div class="stats-panel glass-panel hero-load-animate hero-load-delay-5">
+                    <div class="stat-item">
+                        <span class="stat-number highlight-text" data-editable="true" id="edit-stat1-num"></span>
+                        <span class="stat-label" data-editable="true" id="edit-stat1-lbl"></span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number highlight-text" data-editable="true" id="edit-stat2-num"></span>
+                        <span class="stat-label" data-editable="true" id="edit-stat2-lbl"></span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number highlight-text" data-editable="true" id="edit-stat3-num"></span>
+                        <span class="stat-label" data-editable="true" id="edit-stat3-lbl"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="hero-image-wrapper hero-load-animate hero-load-delay-5">
+                <div class="glowing-border">
+                    <img src="./assets/profile-photo.jpg" alt="Profile Photo" id="profile-photo" class="profile-img">
+                </div>
+            </div>
+        </section>
+
+        <!-- 1.5 About Section -->
+        <section id="about-section" class="about-section-container">
+            <h2 class="section-title" style="font-size: 32px; margin-bottom: 30px;">About Me</h2>
+            <div class="glass-card about-card" style="width: 100%; max-width: 800px; margin: 0 auto; padding: 30px;">
+                <p style="margin-bottom: 15px; line-height: 1.6; color: var(--text-secondary);">Hi, I'm Alan, a Computer Science and Engineering student with a passion for building simple, modern, and user-friendly web applications. I enjoy turning ideas into practical solutions while continuously learning new technologies and improving my development skills.</p>
+                <p style="margin-top: 16px; line-height: 1.6; color: var(--text-secondary);">My interests include full-stack development, UI/UX design, and cloud technologies. I love creating projects that solve real-world problems and am always exploring new ideas, building meaningful applications, and growing as a developer.</p>
+            </div>
+        </section>
+
+        <!-- 2. Expertise Section -->
+        <section id="expertise" class="expertise-section">
+            <div class="section-header">
+                <h2 data-editable="true" id="edit-title-expertise">My Expertise</h2>
+                <div class="layout-controls admin-only" data-target="expertise-grid" style="display: none;">
+                    <button class="btn-icon active" data-layout="grid"><i class="fa-solid fa-border-all"></i></button>
+                    <button class="btn-icon" data-layout="list"><i class="fa-solid fa-list"></i></button>
+                </div>
+            </div>
+
+            <div class="glass-grid expertise-grid layout-grid grid" id="expertise-grid">
+                <div class="glass-tile expertise-tile" draggable="true">
+                    <i class="fa-brands fa-python highlight-text"></i>
+                    <h3 data-editable="true" id="edit-skill-1"></h3>
+                </div>
+                <div class="glass-tile expertise-tile" draggable="true">
+                    <i class="fa-solid fa-brain highlight-text"></i>
+                    <h3 data-editable="true" id="edit-skill-2"></h3>
+                </div>
+                <div class="glass-tile expertise-tile" draggable="true">
+                    <i class="fa-solid fa-network-wired highlight-text"></i>
+                    <h3 data-editable="true" id="edit-skill-3"></h3>
+                </div>
+                <div class="glass-tile expertise-tile" draggable="true">
+                    <i class="fa-brands fa-git-alt highlight-text"></i>
+                    <h3 data-editable="true" id="edit-skill-4"></h3>
+                </div>
+                <div class="glass-tile expertise-tile" draggable="true">
+                    <i class="fa-brands fa-java highlight-text"></i>
+                    <h3 data-editable="true" id="edit-skill-5"></h3>
+                </div>
+                <div class="glass-tile expertise-tile" draggable="true">
+                    <i class="fa-solid fa-code highlight-text"></i>
+                    <h3 data-editable="true" id="edit-skill-6"></h3>
+                </div>
+                <div class="glass-tile expertise-tile" draggable="true">
+                    <i class="fa-solid fa-database highlight-text"></i>
+                    <h3 data-editable="true" id="edit-skill-7"></h3>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. Projects Section -->
+        <section id="projects" class="projects-section">
+            <div class="section-header">
+                <h2 data-editable="true" id="edit-title-proj">Projects</h2>
+                <div class="layout-controls admin-only" data-target="proj-grid" style="display: none;">
+                    <button class="btn-icon active" data-layout="grid"><i class="fa-solid fa-border-all"></i></button>
+                    <button class="btn-icon" data-layout="stack"><i class="fa-solid fa-layer-group"></i></button>
+                    <button class="btn-icon" data-layout="carousel"><i class="fa-solid fa-images"></i></button>
+                </div>
+            </div>
+
+            <div class="glass-grid layout-grid proj-grid grid" id="proj-grid">
+                <!-- Project 1 -->
+                <div class="glass-tile vertical-tile" draggable="true">
+                    <div class="drag-handle admin-only" style="display: none;"><i class="fa-solid fa-grip-lines"></i>
+                    </div>
+                    <div class="tile-image placeholder-img"></div>
+                    <h3 class="highlight-text" data-editable="true" id="edit-proj1-title"></h3>
+                    <p data-editable="true" id="edit-proj1-desc"></p>
+                </div>
+                <!-- Project 2 -->
+                <div class="glass-tile vertical-tile" draggable="true">
+                    <div class="drag-handle admin-only" style="display: none;"><i class="fa-solid fa-grip-lines"></i>
+                    </div>
+                    <div class="tile-image placeholder-img"></div>
+                    <h3 class="highlight-text" data-editable="true" id="edit-proj2-title"></h3>
+                    <p data-editable="true" id="edit-proj2-desc"></p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. Experiences & Certifications -->
+        <section id="experiences" class="experiences-section">
+            <div class="section-header">
+                <h2 data-editable="true" id="edit-title-exp">Experiences & Certifications</h2>
+                <div class="layout-controls admin-only" data-target="exp-grid" style="display: none;">
+                    <button class="btn-icon active" data-layout="grid"><i class="fa-solid fa-border-all"></i></button>
+                    <button class="btn-icon" data-layout="stack"><i class="fa-solid fa-layer-group"></i></button>
+                    <button class="btn-icon" data-layout="carousel"><i class="fa-solid fa-images"></i></button>
+                </div>
+            </div>
+
+            <div class="glass-grid layout-grid exp-grid grid" id="exp-grid">
+                <!-- Tile 1 -->
+                <div class="glass-tile vertical-tile" draggable="true">
+                    <div class="drag-handle admin-only" style="display: none;"><i class="fa-solid fa-grip-lines"></i>
+                    </div>
+                    <div class="tile-image placeholder-img"></div>
+                    <h3 class="highlight-text" data-editable="true" id="edit-exp1-title"></h3>
+                    <p data-editable="true" id="edit-exp1-desc"></p>
+                </div>
+                <!-- Tile 2 -->
+                <div class="glass-tile vertical-tile" draggable="true">
+                    <div class="drag-handle admin-only" style="display: none;"><i class="fa-solid fa-grip-lines"></i>
+                    </div>
+                    <div class="tile-image placeholder-img"></div>
+                    <h3 class="highlight-text" data-editable="true" id="edit-exp2-title"></h3>
+                    <p data-editable="true" id="edit-exp2-desc"></p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 5. Publications Section -->
+        <section id="publications" class="publications-section">
+            <div class="section-header">
+                <h2 data-editable="true" id="edit-title-pub">Publications</h2>
+                <div class="layout-controls admin-only" data-target="pub-grid" style="display: none;">
+                    <button class="btn-icon active" data-layout="grid"><i class="fa-solid fa-border-all"></i></button>
+                    <button class="btn-icon" data-layout="stack"><i class="fa-solid fa-layer-group"></i></button>
+                </div>
+            </div>
+
+            <div class="glass-grid layout-grid pub-grid grid" id="pub-grid">
+                <div class="glass-tile vertical-tile" draggable="true">
+                    <div class="drag-handle admin-only" style="display: none;"><i class="fa-solid fa-grip-lines"></i>
+                    </div>
+                    <div class="tile-image placeholder-img"></div>
+                    <h3 class="highlight-text" data-editable="true" id="edit-pub1-title"></h3>
+                    <p data-editable="true" id="edit-pub1-desc"></p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Popups / Modals -->
+    <div id="contact-popup" class="glass-popup-overlay">
+        <div class="glass-popup">
+            <button class="close-popup"><i class="fa-solid fa-xmark"></i></button>
+            <h2 data-editable="true" id="edit-contact-title" style="margin-top: 0; margin-bottom: 20px;">Contact Me</h2>
+            <form id="contact-form" class="contact-form" action="https://formsubmit.co/alanvarghese2021@gmail.com" method="POST">
+                <input type="text" name="name" placeholder="Your Name" class="glass-input" required>
+                <input type="email" name="email" placeholder="Your Email" class="glass-input" required>
+                <textarea name="message" placeholder="Your Message" class="glass-input" rows="4" required></textarea>
+                <input type="hidden" name="_captcha" value="false">
+                <button type="submit" class="btn btn-primary">Send Message</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="project-popup" class="glass-popup-overlay">
+        <div class="glass-popup">
+            <button class="close-popup"><i class="fa-solid fa-xmark"></i></button>
+            <h2 id="popup-proj-title">Project Title</h2>
+            <h4 id="popup-proj-subtitle" class="popup-subtitle">Role: Developer</h4>
+
+            <h3 class="popup-section-title">Tech Stack</h3>
+            <div id="popup-proj-tech" class="tech-stack-container">
+            </div>
+
+            <h3 class="popup-section-title">Overview</h3>
+            <p id="popup-proj-overview" class="scrollable-desc"></p>
+
+            <h3 class="popup-section-title">Key Features</h3>
+            <ul id="popup-proj-features" class="popup-features-list">
+            </ul>
+
+            <a href="#" id="popup-proj-link" class="btn btn-primary" target="_blank"
+                style="display: none; margin-top: 15px;">View Project</a>
+        </div>
+    </div>
+
+    <!-- Small Tile Settings Modal (Admin) -->
+    <div id="tile-settings-popup" class="glass-popup-overlay">
+        <div class="glass-popup" style="max-width: 400px;">
+            <button class="close-popup"><i class="fa-solid fa-xmark"></i></button>
+            <h2>Tile Settings</h2>
+            <form id="tile-settings-form" style="display: flex; flex-direction: column; gap: 15px; margin-top: 20px;">
+                <label>Icon Source (SVG, URL, or fa-class)</label>
+                <input type="text" id="tile-icon-input" class="glass-input" placeholder="fa-brands fa-python">
+                <button type="submit" class="btn btn-primary">Save Settings</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Large Tile Settings Modal (Admin) -->
+    <div id="large-tile-edit-popup" class="glass-popup-overlay">
+        <div class="glass-popup" style="max-width: 500px;">
+            <button class="close-popup"><i class="fa-solid fa-xmark"></i></button>
+            <h3 style="color: white; margin-bottom: 20px;">Edit Tile Details</h3>
+            <form id="large-tile-form" style="display: flex; flex-direction: column;">
+                <label style="margin-bottom: 8px; font-weight: 600;">Title</label>
+                <input type="text" id="large-tile-title" class="glass-input" style="margin-bottom: 20px;">
+
+                <label style="margin-bottom: 8px; font-weight: 600;">Subtitle / Role</label>
+                <input type="text" id="large-tile-subtitle" class="glass-input" style="margin-bottom: 20px;">
+
+                <label style="margin-bottom: 8px; font-weight: 600;">Tech Stack (Comma separated)</label>
+                <input type="text" id="large-tile-tech" class="glass-input" placeholder="Python, Data Analysis, SQL"
+                    style="margin-bottom: 20px;">
+
+                <label style="margin-bottom: 8px; font-weight: 600;">Overview</label>
+                <textarea id="large-tile-overview" class="glass-input" rows="3" style="margin-bottom: 20px;"></textarea>
+
+                <label style="margin-bottom: 8px; font-weight: 600;">Key Features (Bullet points, Comma
+                    separated)</label>
+                <textarea id="large-tile-features" class="glass-input" rows="3"
+                    placeholder="Real-time detection, High accuracy, Cloud deployment"
+                    style="margin-bottom: 20px;"></textarea>
+
+                <label style="margin-bottom: 8px; font-weight: 600;">Upload Preview Image</label>
+                <input type="file" id="large-tile-image-file" class="glass-input" accept="image/*"
+                    style="margin-bottom: 10px;">
+                <input type="text" id="large-tile-image-url" class="glass-input"
+                    placeholder="Or enter Image URL fallback" style="margin-bottom: 25px;">
+
+                <button type="submit" class="btn btn-primary" style="width: 100%;">Save Tile</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Login Modal -->
+    <div id="login-popup" class="glass-popup-overlay">
+        <div class="glass-popup login-modal">
+            <button class="close-popup"><i class="fa-solid fa-xmark"></i></button>
+            <h2 class="admin-modal-title">Admin Login</h2>
+            <form class="login-form" id="login-form">
+                <input type="email" id="admin-email" placeholder="Email" class="glass-input" autocomplete="username" readonly onfocus="this.removeAttribute('readonly');" onclick="handleAdminEmailClick();" required>
+                <input type="password" id="admin-password" placeholder="Password" class="glass-input" autocomplete="current-password" style="display:none;" required>
+                <p id="login-error" class="error-msg" style="display: none; color: #ef4444; font-size: 12px;"></p>
+                <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 10px;">Login</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Admin Panel -->
+    <aside class="admin-panel glass-panel" id="admin-panel">
+        <div class="admin-header" id="admin-header-drag">
+            <h3><i class="fa-solid fa-gear"></i> Admin Editor</h3>
+            <button class="close-admin" id="close-admin-btn"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+
+        <div class="admin-content">
+            <div class="admin-group">
+                <h4>Theme Color</h4>
+                <div class="color-swatches" id="color-swatches">
+                    <div class="swatch active" style="background: #3b82f6" data-color="#3b82f6"></div>
+                    <div class="swatch" style="background: #f97316" data-color="#f97316"></div>
+                    <div class="swatch" style="background: #a855f7" data-color="#a855f7"></div>
+                    <div class="swatch" style="background: #10b981" data-color="#10b981"></div>
+                    <div class="swatch" style="background: #ef4444" data-color="#ef4444"></div>
+                </div>
+            </div>
+
+            <div class="admin-group">
+                <h4>Profile Photo</h4>
+                <input type="file" id="upload-photo" accept="image/*" class="glass-input"
+                    style="font-size: 12px; padding: 5px;">
+            </div>
+
+            <div class="admin-group">
+                <h4>Text Editor Mode</h4>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="edit-mode-toggle">
+                    <span class="slider"></span>
+                </label>
+                <small class="admin-help">Turn on to click and edit text directly on the page.</small>
+            </div>
+
+            <div class="admin-group">
+                <h4>Pop-ups Enabled</h4>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="popups-toggle" checked>
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <div class="admin-group">
+                <h4>Background Animation</h4>
+                <select id="bg-animation-select" class="glass-input">
+                    <option value="particles">Moving Particles</option>
+                    <option value="waves">Energy Waves</option>
+                    <option value="none">None (Static)</option>
+                </select>
+            </div>
+
+            <button class="btn btn-outline" id="add-section-btn"
+                style="width: 100%; margin-top: 10px; border-color: #10b981; color: #10b981;"><i
+                    class="fa-solid fa-plus"></i> Add New Section</button>
+            <button class="btn btn-primary" id="save-btn" style="width: 100%; margin-top: 20px;">Save Changes</button>
+
+            <button class="btn btn-logout" id="logout-btn" style="width: 100%; margin-top: 15px;">Logout</button>
+        </div>
+    </aside>
+
+    <button id="open-admin" class="btn btn-primary glass-icon"
+        style="display:none; position: fixed; right: 20px; top: 50%; transform: translateY(-50%); z-index: 1000;"><i
+            class="fa-solid fa-gear"></i></button>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-storage-compat.js"></script>
+
+    <script src="app.js"></script>
+</body>
+
+</html>
