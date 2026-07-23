@@ -257,21 +257,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Quietly fetch Firebase data in the background
             try {
-                loadState()
-                    .then(() => {
-                        document.body.style.opacity = '1';
-                        document.body.style.visibility = 'visible';
-                    })
-                    .catch(error => {
-                        console.error("Firebase load error:", error);
-                        document.body.style.opacity = '1';
-                        document.body.style.visibility = 'visible';
-                    });
+                loadState().catch(error => {
+                    console.error("Firebase load error:", error);
+                });
             } catch (err) {
                 console.error("Synchronous error during loadState:", err);
-                document.body.style.opacity = '1';
-                document.body.style.visibility = 'visible';
-            }        }
+            }
+        }
     });
 
     function closeAdminPanel() {
