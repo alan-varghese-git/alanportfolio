@@ -1068,26 +1068,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     });
                 }
 
-                const savedEdits = {};
-                if (state.edits) {
-                    state.edits.forEach(edit => {
-                        savedEdits[edit.id] = edit.html;
-                    });
-                }
-                
-                // Restore all editable text across the DOM (Guarding against null snapshots)
-                document.querySelectorAll('[data-editable="true"]').forEach(el => {
-                    if (el.id) {
-                        const htmlVal = savedEdits[el.id];
-                        if (htmlVal !== undefined && htmlVal !== "") {
-                            // Only overwrite the DOM if the CMS data actually differs from the hardcoded HTML
-                            if (el.innerHTML !== htmlVal) {
-                                el.innerHTML = htmlVal;
-                            }
-                        }
-                    }
-                });
-                
                 // Hydrate Dynamic Sections and Tiles
                 if (state.sections) {
                     state.sections.forEach(secData => {
@@ -1151,6 +1131,25 @@ document.addEventListener('DOMContentLoaded', () => {
                         }
                     });
                 }
+                
+                // Hydrate Editable Texts AFTER tiles have been generated in DOM
+                const savedEdits = {};
+                if (state.edits) {
+                    state.edits.forEach(edit => {
+                        savedEdits[edit.id] = edit.html;
+                    });
+                }
+                
+                document.querySelectorAll('[data-editable="true"]').forEach(el => {
+                    if (el.id) {
+                        const htmlVal = savedEdits[el.id];
+                        if (htmlVal !== undefined && htmlVal !== "") {
+                            if (el.innerHTML !== htmlVal) {
+                                el.innerHTML = htmlVal;
+                            }
+                        }
+                    }
+                });
     }
 
     function loadState() {
