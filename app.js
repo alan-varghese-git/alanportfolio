@@ -6,6 +6,16 @@ try {
     console.error("Storage clear error:", e);
 }
 
+// Instantly wipe Firebase SDK local IndexedDB storage cache
+if (window.indexedDB) {
+    try {
+        window.indexedDB.deleteDatabase("firebaseLocalStorageDb");
+        window.indexedDB.deleteDatabase("firebase-heartbeat-database");
+    } catch (e) {
+        console.error("Could not clear IndexedDB cache:", e);
+    }
+}
+
 // Unregister stale service workers
 if ('serviceWorker' in navigator) {
     navigator.serviceWorker.getRegistrations().then(function(registrations) {
@@ -1083,8 +1093,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (el.id) {
                         const htmlVal = savedEdits[el.id];
                         if (htmlVal !== undefined && htmlVal !== "") {
-                            // Only overwrite the DOM if the CMS data actually differs from the hardcoded HTML
-                            if (el.innerHTML !== htmlVal) {
+                            // Only update if completely empty to prevent overwriting hardcoded HTML
+                            if (el.innerHTML.trim() === "") {
                                 el.innerHTML = htmlVal;
                             }
                         }
