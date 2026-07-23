@@ -105,58 +105,6 @@ p, span, li {
 }
 
 /* Global Loader */
-.global-loader {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background-color: var(--bg-color);
-    z-index: 9999;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: opacity 0.5s ease-in, visibility 0.5s ease-in;
-}
-
-.pulsing-logo {
-    font-size: 3rem;
-    font-weight: 800;
-    animation: pulse 1.5s infinite;
-}
-
-@keyframes pulse {
-    0% {
-        opacity: 0.5;
-        transform: scale(0.95);
-    }
-
-    50% {
-        opacity: 1;
-        transform: scale(1.05);
-    }
-
-    100% {
-        opacity: 0.5;
-        transform: scale(0.95);
-    }
-}
-
-body.app-loaded .global-loader {
-    opacity: 0;
-    visibility: hidden;
-    pointer-events: none;
-}
-
-/* Main Content Fade-in */
-.container {
-    opacity: 0;
-    transition: opacity 0.5s ease-in;
-}
-
-body.app-loaded .container {
-    opacity: 1;
-}
 
 /* Background Canvas */
 #bg-canvas {

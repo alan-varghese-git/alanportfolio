@@ -245,14 +245,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!initialLoadComplete) {
             initialLoadComplete = true;
 
-            const hideLoader = () => {
-                document.body.classList.add('app-loaded');
-                const mainContent = document.querySelector('.container');
-                if (mainContent) mainContent.style.opacity = '1';
-            };
 
-            // Display static content instantly
-            hideLoader();
 
             // Quietly fetch Firebase data in the background
             try {
