@@ -1,3 +1,28 @@
+// Unregister stale service workers
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.getRegistrations().then(function(registrations) {
+        for(let registration of registrations) {
+            registration.unregister();
+        }
+    });
+}
+// Clear old browser caches
+if ('caches' in window) {
+    caches.keys().then(function(names) {
+        for (let name of names) {
+            caches.delete(name);
+        }
+    });
+}
+
+// Ensure all fetch requests bypass Safari caching
+async function loadFreshContent(url) {
+    const response = await fetch(url + '?t=' + new Date().getTime(), {
+        cache: 'no-store'
+    });
+    return await response.text();
+}
+
 const firebaseConfig = {
     apiKey: "AIzaSyCEiDFvWsPif3_vC9V5vu7eBPMXl7TFfT8",
     authDomain: "alanportfolio-21b78.firebaseapp.com",
