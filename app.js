@@ -64,6 +64,20 @@ window.addEventListener('beforeunload', () => {
 
 document.addEventListener('DOMContentLoaded', () => {
 
+    // 1. Instant Cache Reading
+    const cachedData = localStorage.getItem('portfolio_cache');
+    if (cachedData) {
+        try {
+            const data = JSON.parse(cachedData);
+            // We use setTimeout to ensure all other DOM queries/functions are initialized
+            setTimeout(() => {
+                applyPortfolioState(data);
+            }, 0);
+        } catch (e) {
+            console.error("Error parsing cached portfolio data:", e);
+        }
+    }
+
     window.scrollTo(0, 0);
     // Clear any URL hash on initial load to prevent browser jump behavior
     if (window.location.hash && history.replaceState) {
@@ -1143,17 +1157,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function loadState() {
-        // 1. Instant Cache Reading
-        const cachedData = localStorage.getItem('portfolio_cache');
-        if (cachedData) {
-            try {
-                const data = JSON.parse(cachedData);
-                applyPortfolioState(data);
-            } catch (e) {
-                console.error("Error parsing cached portfolio data:", e);
-            }
-        }
-
         // 2. Firebase Listener to Write and Refresh Cache
         if (typeof db !== 'undefined' && db !== null) {
             db.collection('settings').doc('portfolio_settings').onSnapshot((settingsDoc) => {
