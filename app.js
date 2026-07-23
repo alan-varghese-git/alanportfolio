@@ -42,6 +42,17 @@ const firebaseConfig = {
 
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
+const db = firebase.firestore();
+
+// Enable offline persistence so Firebase data loads instantly from local cache
+db.enablePersistence({ synchronizeTabs: true })
+  .catch((err) => {
+      if (err.code == 'failed-precondition') {
+          console.log('Multiple tabs open, persistence can only be enabled in one tab at a time.');
+      } else if (err.code == 'unimplemented') {
+          console.log('The current browser does not support all of the features required to enable persistence');
+      }
+  });
 
 const storage = firebase.storage();
 storage.setMaxUploadRetryTime(15000); // 15 seconds (default is 10 minutes)
@@ -910,7 +921,7 @@ document.addEventListener('DOMContentLoaded', () => {
         tile.addEventListener('click', handleTileClick);
     }
 
-    async function savePortfolioStateToGitHub() {
+    function savePortfolioStateToFirestore() {
         // Collect edits
         const edits = [];
         editableElements.forEach((el, index) => {
@@ -924,7 +935,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const titleEl = sec.querySelector('.section-header h2');
             const titleId = titleEl ? titleEl.id : null;
             const isDynamic = sec.classList.contains('dynamic-section');
-            const isExpertise = sec.classList.contains('expertise-section'); 
+            const isExpertise = sec.classList.contains('expertise-section'); // to know what type of tiles to generate
             const grid = sec.querySelector('.glass-grid');
             const gridId = grid ? grid.id : null;
             
@@ -973,115 +984,19 @@ document.addEventListener('DOMContentLoaded', () => {
             edits: edits,
             sections: sectionsData,
             layouts: layouts,
-            photoUrl: profileImg.src.startsWith('data:') ? profileImg.src : null,
-            tilesData: tilesData
+            photoUrl: profileImg.src.startsWith('data:') ? profileImg.src : null
         };
 
-        let githubToken = sessionStorage.getItem('github_pat');
-        if (!githubToken) {
-            githubToken = prompt("Enter your GitHub Personal Access Token to publish static HTML:");
-            if (!githubToken) return Promise.reject(new Error("No GitHub PAT provided"));
-            sessionStorage.setItem('github_pat', githubToken);
-        }
+        const batch = db.batch();
+        const settingsRef = db.collection('settings').doc('portfolio_settings');
+        batch.set(settingsRef, state, { merge: true });
 
-        // 1. Clone the main container
-        const mainClone = document.querySelector('main').cloneNode(true);
-        
-        // 2. Strip all admin/CMS elements
-        mainClone.querySelectorAll('.admin-only').forEach(el => el.remove());
-        mainClone.querySelectorAll('.add-tile-btn').forEach(el => el.remove());
-        mainClone.querySelectorAll('.delete-btn').forEach(el => el.remove());
-        mainClone.querySelectorAll('.upload-overlay').forEach(el => el.remove());
-        mainClone.querySelectorAll('[contenteditable]').forEach(el => {
-            el.removeAttribute('contenteditable');
-            el.removeAttribute('data-editable');
-            el.classList.remove('editable-active');
+        tilesData.forEach(tData => {
+            const tileRef = db.collection('tiles').doc(tData.id);
+            batch.set(tileRef, tData, { merge: true });
         });
 
-        const newMainInner = mainClone.innerHTML;
-        const themeColor = getComputedStyle(document.documentElement).getPropertyValue('--primary-color').trim();
-        
-        // 3. Fetch the latest index.html base template from the repo
-        const repoOwner = "alan-varghese-git";
-        const repoName = "alanportfolio";
-        const urlHtml = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/index.html`;
-
-        try {
-            // Get current file SHA and content
-            const getResHtml = await fetch(urlHtml, {
-                headers: { "Authorization": `token ${githubToken}` }
-            });
-            let shaHtml = null;
-            let currentHtml = "";
-            if (getResHtml.ok) {
-                const fileData = await getResHtml.json();
-                shaHtml = fileData.sha;
-                // decode base64
-                currentHtml = decodeURIComponent(escape(atob(fileData.content)));
-            } else {
-                throw new Error("Could not fetch current index.html from GitHub");
-            }
-
-            // 4. Replace the <main> block in the HTML text
-            let updatedHtml = currentHtml.replace(/<main>[\s\S]*?<\/main>/i, `<main>\n${newMainInner}\n    </main>`);
-            
-            // 5. Update Theme Color in <head> if a dynamic style block exists, or add one
-            const themeBlock = `<style id="dynamic-theme">:root { --primary-color: ${themeColor}; }</style>`;
-            if (updatedHtml.includes('id="dynamic-theme"')) {
-                updatedHtml = updatedHtml.replace(/<style id="dynamic-theme">[\s\S]*?<\/style>/i, themeBlock);
-            } else {
-                updatedHtml = updatedHtml.replace('</head>', `    ${themeBlock}\n</head>`);
-            }
-
-            // Safe Base64 encoding for Unicode
-            const base64Html = btoa(unescape(encodeURIComponent(updatedHtml)));
-            const base64Json = btoa(unescape(encodeURIComponent(JSON.stringify(state, null, 2))));
-            
-            const putResHtml = await fetch(urlHtml, {
-                method: "PUT",
-                headers: {
-                    "Authorization": `token ${githubToken}`,
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    message: "Publish static HTML update via Admin panel",
-                    content: base64Html,
-                    sha: shaHtml
-                })
-            });
-
-            // 6. Push data.json update to GitHub
-            let shaJson = null;
-            const urlJson = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/data.json`;
-            const getResJson = await fetch(urlJson, { headers: { "Authorization": `token ${githubToken}` } });
-            if (getResJson.ok) {
-                const jsonData = await getResJson.json();
-                shaJson = jsonData.sha;
-            }
-            const putResJson = await fetch(urlJson, {
-                method: "PUT",
-                headers: {
-                    "Authorization": `token ${githubToken}`,
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    message: "Update CMS state data.json",
-                    content: base64Json,
-                    sha: shaJson
-                })
-            });
-
-            if (putResHtml.ok && putResJson.ok) {
-                return true;
-            } else {
-                if (putResHtml.status === 401 || putResHtml.status === 403 || putResJson.status === 401) {
-                    sessionStorage.removeItem('github_pat'); 
-                }
-                throw new Error("Failed to push updates to GitHub. Ensure PAT is valid and has repo scope.");
-            }
-        } catch (error) {
-            throw error;
-        }
+        return batch.commit();
     }
 
     const addSectionBtn = document.getElementById('add-section-btn');
@@ -1094,7 +1009,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const saveBtn = document.getElementById('save-btn');
     saveBtn.addEventListener('click', () => {
-        savePortfolioStateToGitHub().then(() => {
+        savePortfolioStateToFirestore().then(() => {
             const originalText = saveBtn.innerText;
             saveBtn.innerText = "Saved!";
             saveBtn.style.backgroundColor = '#10b981';
@@ -1103,8 +1018,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 saveBtn.style.backgroundColor = '';
             }, 2000);
         }).catch(error => {
-            console.error("Error saving state to GitHub:", error);
-            alert(`Save Error: ${error.message}`);
+            console.error("Error saving state to Firestore:", error);
+            alert(`Firestore Error: ${error.code} - ${error.message}`);
             saveBtn.innerText = "Error!";
         });
     });
@@ -1112,18 +1027,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // Load state
-    async function loadState() {
-        try {
-            const isGitHubPages = window.location.hostname.includes("github.io");
-            const jsonPath = isGitHubPages ? "/alanportfolio/data.json" : "./data.json";
-            
-            const response = await fetch(jsonPath + '?t=' + new Date().getTime());
-            if (!response.ok) return;
-            const state = await response.json();
-            
-            if (Object.keys(state).length === 0) return; // empty data.json
+    function loadState() {
+        return Promise.all([
+            db.collection('settings').doc('portfolio_settings').get(),
+            db.collection('tiles').get()
+        ]).then(([settingsDoc, tilesSnapshot]) => {
+            if (settingsDoc.exists) {
+                const state = settingsDoc.data();
 
-            if (state) {
+                // Dynamically stitch the separated tiles back into the state object
+                const fetchedTiles = [];
+                tilesSnapshot.forEach(doc => {
+                    fetchedTiles.push(doc.data());
+                });
+                state.tilesData = fetchedTiles;
 
                 // Restore theme
                 document.documentElement.style.setProperty('--primary-color', state.themeColor);
@@ -1358,3 +1275,84 @@ function updateProfileImage(url) {
         img.src = url;
     }
 }
+// Particle Canvas Background
+document.addEventListener("DOMContentLoaded", () => {
+    const canvas = document.getElementById('particle-canvas');
+    if (canvas) {
+        const ctx = canvas.getContext('2d');
+        
+        let particles = [];
+        const numParticles = 100;
+        
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            initParticles();
+        }
+        
+        window.addEventListener('resize', resizeCanvas);
+        
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.vx = (Math.random() - 0.5) * 0.5;
+                this.vy = (Math.random() - 0.5) * 0.5;
+                this.radius = Math.random() * 2 + 1;
+            }
+            
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                
+                if (this.x < 0 || this.x > canvas.width) this.vx *= -1;
+                if (this.y < 0 || this.y > canvas.height) this.vy *= -1;
+            }
+            
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+                ctx.fill();
+            }
+        }
+        
+        function initParticles() {
+            particles = [];
+            for (let i = 0; i < numParticles; i++) {
+                particles.push(new Particle());
+            }
+        }
+        
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+            
+            // Draw lines between close particles
+            for (let i = 0; i < particles.length; i++) {
+                for (let j = i + 1; j < particles.length; j++) {
+                    const dx = particles[i].x - particles[j].x;
+                    const dy = particles[i].y - particles[j].y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (dist < 100) {
+                        ctx.beginPath();
+                        ctx.moveTo(particles[i].x, particles[i].y);
+                        ctx.lineTo(particles[j].x, particles[j].y);
+                        ctx.strokeStyle = `rgba(255, 255, 255, ${0.2 - dist/500})`;
+                        ctx.stroke();
+                    }
+                }
+            }
+            
+            requestAnimationFrame(animateParticles);
+        }
+        
+        resizeCanvas();
+        animateParticles();
+    }
+});
