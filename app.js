@@ -798,13 +798,13 @@ document.addEventListener('DOMContentLoaded', () => {
             newTile.style.cursor = 'pointer';
             newTile.innerHTML = `
                 <div class="drag-handle admin-only" style="display: ${document.body.classList.contains('admin-mode') ? 'flex' : 'none'}; position: absolute; right: 10px; top: 10px;"><i class="fa-solid fa-grip-lines"></i></div>
-                <div class="card-icon-box" style="flex-shrink: 0; background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.2); border-radius: 12px; padding: 14px; display: flex; align-items: center; justify-content: center; color: #3b82f6;">
+                <div class="card-icon-box" style="flex-shrink: 0; background: color-mix(in srgb, var(--primary-color) 10%, transparent); border: 1px solid color-mix(in srgb, var(--primary-color) 20%, transparent); border-radius: 12px; padding: 14px; display: flex; align-items: center; justify-content: center; color: var(--primary-color);">
                     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/><path d="M6 6h10M6 10h10"/></svg>
                 </div>
                 <div class="card-info" style="flex-grow: 1;">
-                    <h3 style="color: #3b82f6; font-size: 1.1rem; margin-bottom: 4px; font-weight: 600;" data-editable="true" id="${tileId}-title">New Entry</h3>
-                    <p class="card-meta" style="color: #94a3b8; font-size: 0.85rem; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;" data-editable="true" id="${tileId}-date">📅 2023 - Present</p>
-                    <p class="card-desc" style="color: #cbd5e1; font-size: 0.9rem; line-height: 1.5; margin: 0;" data-editable="true" id="${tileId}-desc">Description...</p>
+                    <h3 style="color: var(--primary-color); font-size: 1.1rem; margin-bottom: 4px; font-weight: 600;" data-editable="true" id="${tileId}-title">New Entry</h3>
+                    <p class="card-meta" style="color: color-mix(in srgb, var(--primary-color) 50%, #94a3b8); font-size: 0.85rem; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;" data-editable="true" id="${tileId}-date">📅 2023 - Present</p>
+                    <p class="card-desc" style="color: color-mix(in srgb, var(--primary-color) 30%, #cbd5e1); font-size: 0.9rem; line-height: 1.5; margin: 0;" data-editable="true" id="${tileId}-desc">Description...</p>
                 </div>
             `;
         }
