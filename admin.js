@@ -324,7 +324,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
             function loadState() {
-                return fetch('./data.json')
+                const isGitHubPages = window.location.hostname.includes("github.io");
+                const jsonPath = isGitHubPages ? "/alanportfolio/data.json" : "./data.json";
+                return fetch(jsonPath + '?t=' + new Date().getTime())
                     .then(res => res.json())
                     .then(data => {
                         applyState(data);
