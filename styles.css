@@ -115,6 +115,8 @@ p, span, li {
     height: 100vh;
     z-index: -1;
     pointer-events: none;
+    will-change: transform;
+    transform: translateZ(0);
 }
 
 /* Typography & Utilities */
@@ -471,6 +473,7 @@ section {
     backdrop-filter: var(--glass-blur);
     border: 1px solid var(--glass-border);
     border-radius: 12px;
+    contain: content;
 }
 
 .glass-tile {
@@ -482,6 +485,7 @@ section {
     transition: all 0.3s ease;
     position: relative;
     cursor: grab;
+    contain: content;
 }
 
 .glass-tile:active {
@@ -745,6 +749,8 @@ body.admin-mode [data-editable="true"]:focus {
     z-index: 9999;
     max-height: 85vh;
     overflow-y: auto;
+    contain: content;
+    will-change: transform;
     font-family: 'Outfit', sans-serif;
     color: #e2e8f0;
 }

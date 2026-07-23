@@ -124,10 +124,17 @@ document.addEventListener('DOMContentLoaded', () => {
     let waveOffset = 0;
 
     function resizeCanvas() {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
+        if (canvas.width !== window.innerWidth || canvas.height !== window.innerHeight) {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
     }
-    window.addEventListener('resize', resizeCanvas);
+
+    let resizeTimeout;
+    window.addEventListener('resize', () => {
+        clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(resizeCanvas, 100);
+    }, { passive: true });
     resizeCanvas();
 
     class Particle {
@@ -157,9 +164,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    const maxParticles = window.innerWidth < 768 ? 30 : 60;
     function initParticles() {
         particlesArray = [];
-        for (let i = 0; i < 100; i++) {
+        for (let i = 0; i < maxParticles; i++) {
             particlesArray.push(new Particle());
         }
     }
