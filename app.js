@@ -1067,6 +1067,16 @@ document.addEventListener('DOMContentLoaded', () => {
                     });
                 }
                 
+                // Restore all editable text across the DOM (Guarding against null snapshots)
+                document.querySelectorAll('[data-editable="true"]').forEach(el => {
+                    if (el.id) {
+                        const htmlVal = savedEdits[el.id];
+                        if (htmlVal !== undefined && htmlVal !== "") {
+                            el.innerHTML = htmlVal;
+                        }
+                    }
+                });
+                
                 // Hydrate Dynamic Sections and Tiles
                 if (state.sections) {
                     state.sections.forEach(secData => {
