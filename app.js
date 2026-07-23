@@ -767,17 +767,24 @@ document.addEventListener('DOMContentLoaded', () => {
         
         const tileId = existingTileId || `tile-node-${Date.now()}`;
         const newTile = document.createElement('div');
-        newTile.className = 'glass-tile ' + (isExpertise ? 'expertise-tile' : 'vertical-tile');
         newTile.draggable = true;
         newTile.id = tileId;
-        
-        if (isExpertise) {
+
+        const section = grid.closest('section');
+        let tileType = isExpertise ? 'expertise' : 'project';
+        if (section && !isExpertise && !section.classList.contains('projects-section')) {
+            tileType = 'list';
+        }
+
+        if (tileType === 'expertise') {
+            newTile.className = 'glass-tile expertise-tile';
             newTile.dataset.icon = 'fas fa-star';
             newTile.innerHTML = `
                 <i class="fas fa-star highlight-text"></i>
                 <h3 class="tile-title" data-editable="true" id="${tileId}-title">New Skill</h3>
             `;
-        } else {
+        } else if (tileType === 'project') {
+            newTile.className = 'glass-tile vertical-tile';
             newTile.dataset.image = '';
             newTile.dataset.subtitle = 'Subtitle';
             newTile.dataset.tech = 'Tech 1';
@@ -788,6 +795,31 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="tile-image placeholder-img"></div>
                 <h3 class="highlight-text" data-editable="true" id="${tileId}-title">New Project</h3>
                 <p data-editable="true" id="${tileId}-desc">Short description...</p>
+            `;
+        } else {
+            // Modern Horizontal List Layout
+            newTile.className = 'glass-tile list-tile content-card';
+            newTile.dataset.desc = 'Description...';
+            newTile.dataset.subtitle = '';
+            newTile.dataset.tech = '';
+            newTile.dataset.features = '';
+            newTile.style.display = 'flex';
+            newTile.style.gap = '20px';
+            newTile.style.alignItems = 'flex-start';
+            newTile.style.flexDirection = 'row';
+            newTile.style.textAlign = 'left';
+            newTile.style.padding = '20px';
+            newTile.style.cursor = 'pointer';
+            newTile.innerHTML = `
+                <div class="drag-handle admin-only" style="display: ${document.body.classList.contains('admin-mode') ? 'flex' : 'none'}; position: absolute; right: 10px; top: 10px;"><i class="fa-solid fa-grip-lines"></i></div>
+                <div class="card-icon-box" style="flex-shrink: 0; background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.2); border-radius: 12px; padding: 14px; display: flex; align-items: center; justify-content: center; color: #3b82f6;">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/><path d="M6 6h10M6 10h10"/></svg>
+                </div>
+                <div class="card-info" style="flex-grow: 1;">
+                    <h3 style="color: #3b82f6; font-size: 1.1rem; margin-bottom: 4px; font-weight: 600;" data-editable="true" id="${tileId}-title">New Entry</h3>
+                    <p class="card-meta" style="color: #94a3b8; font-size: 0.85rem; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;" data-editable="true" id="${tileId}-date">📅 2023 - Present</p>
+                    <p class="card-desc" style="color: #cbd5e1; font-size: 0.9rem; line-height: 1.5; margin: 0;" data-editable="true" id="${tileId}-desc">Description...</p>
+                </div>
             `;
         }
         
@@ -828,12 +860,12 @@ document.addEventListener('DOMContentLoaded', () => {
             <div class="section-header">
                 <h2 data-editable="true" id="${titleId}">${sectionName}</h2>
                 <div class="layout-controls admin-only" data-target="${gridId}" style="display: ${document.body.classList.contains('admin-mode') ? 'flex' : 'none'};">
-                    <button class="btn-icon active" data-layout="grid"><i class="fa-solid fa-border-all"></i></button>
-                    <button class="btn-icon" data-layout="stack"><i class="fa-solid fa-layer-group"></i></button>
+                    <button class="btn-icon" data-layout="grid"><i class="fa-solid fa-border-all"></i></button>
+                    <button class="btn-icon active" data-layout="stack"><i class="fa-solid fa-layer-group"></i></button>
                     <button class="btn-icon" data-layout="carousel"><i class="fa-solid fa-images"></i></button>
                 </div>
             </div>
-            <div class="glass-grid layout-grid grid" id="${gridId}">
+            <div class="glass-grid layout-grid stack" id="${gridId}">
                 <button class="btn btn-outline add-tile-btn admin-only" data-grid="${gridId}" style="display: ${document.body.classList.contains('admin-mode') ? 'block' : 'none'}; width: 100%;"><i class="fa-solid fa-plus"></i> Add Tile</button>
             </div>
         `;
@@ -851,7 +883,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (typeof draggedItem !== 'undefined' && draggedItem) return;
         if (e.target.isContentEditable) return;
 
-        const isLarge = tile.classList.contains('vertical-tile');
+        const isLarge = tile.classList.contains('vertical-tile') || tile.classList.contains('list-tile');
         const isSmall = tile.classList.contains('expertise-tile');
 
         if (document.body.classList.contains('admin-mode')) {

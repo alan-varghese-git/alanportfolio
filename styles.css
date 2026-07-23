@@ -1455,3 +1455,25 @@ img {
     backdrop-filter: blur(16px);
     background-color: rgba(15, 23, 42, 0.75);
 }
+
+/* List Tile Hover Reveal for Description */
+.list-tile .card-info p:last-child {
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    margin-top: 0;
+    transition: max-height 0.4s ease, opacity 0.3s ease, margin-top 0.3s ease;
+}
+
+.list-tile:hover .card-info p:last-child {
+    max-height: 200px;
+    opacity: 1;
+    margin-top: 8px;
+}
+
+/* Keep expanded in Admin Mode for easy editing */
+body.admin-mode .list-tile .card-info p:last-child {
+    max-height: none;
+    opacity: 1;
+    margin-top: 8px;
+}
