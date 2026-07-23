@@ -1026,22 +1026,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
-    // Load state
-    function loadState() {
-        return Promise.all([
-            db.collection('settings').doc('portfolio_settings').get(),
-            db.collection('tiles').get()
-        ]).then(([settingsDoc, tilesSnapshot]) => {
-            if (settingsDoc.exists) {
-                const state = settingsDoc.data();
-
-                // Dynamically stitch the separated tiles back into the state object
-                const fetchedTiles = [];
-                tilesSnapshot.forEach(doc => {
-                    fetchedTiles.push(doc.data());
-                });
-                state.tilesData = fetchedTiles;
-
+    // Apply state
+    function applyPortfolioState(state) {
                 // Restore theme
                 document.documentElement.style.setProperty('--primary-color', state.themeColor);
 
@@ -1154,9 +1140,42 @@ document.addEventListener('DOMContentLoaded', () => {
                         }
                     });
                 }
-            } else {
+    }
+
+    function loadState() {
+        // 1. Instant Cache Reading
+        const cachedData = localStorage.getItem('portfolio_cache');
+        if (cachedData) {
+            try {
+                const data = JSON.parse(cachedData);
+                applyPortfolioState(data);
+            } catch (e) {
+                console.error("Error parsing cached portfolio data:", e);
             }
-        });
+        }
+
+        // 2. Firebase Listener to Write and Refresh Cache
+        if (typeof db !== 'undefined' && db !== null) {
+            db.collection('settings').doc('portfolio_settings').onSnapshot((settingsDoc) => {
+                db.collection('tiles').get().then((tilesSnapshot) => {
+                    if (settingsDoc.exists) {
+                        const state = settingsDoc.data();
+                        
+                        const fetchedTiles = [];
+                        tilesSnapshot.forEach(doc => {
+                            fetchedTiles.push(doc.data());
+                        });
+                        state.tilesData = fetchedTiles;
+
+                        // Save fresh copy to localStorage for future instant loads
+                        localStorage.setItem('portfolio_cache', JSON.stringify(state));
+
+                        // Seamlessly update UI with latest live data
+                        applyPortfolioState(state);
+                    }
+                });
+            });
+        }
     }
 
     // Assign IDs to tiles and editables initially so they align on load
