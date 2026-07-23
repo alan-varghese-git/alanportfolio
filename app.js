@@ -1016,6 +1016,10 @@ document.addEventListener('DOMContentLoaded', () => {
             photoUrl: profileImg.src.startsWith('data:') ? profileImg.src : null
         };
 
+        // Update local cache synchronously for Admin so reloads are instant
+        state.tilesData = tilesData;
+        localStorage.setItem('portfolio_cache', JSON.stringify(state));
+
         const batch = db.batch();
         const settingsRef = db.collection('settings').doc('portfolio_settings');
         batch.set(settingsRef, state, { merge: true });
