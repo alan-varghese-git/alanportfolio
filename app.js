@@ -246,44 +246,31 @@ document.addEventListener('DOMContentLoaded', () => {
             initialLoadComplete = true;
 
             const hideLoader = () => {
-                setTimeout(() => {
-                    document.body.classList.add('app-loaded');
-                    const loader = document.getElementById('page-loader');
-                    if (loader) {
-                        loader.style.opacity = '0';
-                        setTimeout(() => loader.style.display = 'none', 400);
-                    }
-                    const mainContent = document.querySelector('.container');
-                    if (mainContent) mainContent.style.opacity = '1';
-                }, 300);
+                document.body.classList.add('app-loaded');
+                const mainContent = document.querySelector('.container');
+                if (mainContent) mainContent.style.opacity = '1';
             };
 
-            // Wait for DB data to hydrate DOM
+            // Display static content instantly
+            hideLoader();
+
+            // Quietly fetch Firebase data in the background
             try {
-                loadState()
-                    .then(() => {
-                        hideLoader();
-                    })
-                    .catch(error => {
+                loadState().catch(error => {
                         console.error("Firebase load error:", error);
-                        // Apply default fallbacks if load fails (e.g., permissions issue)
                         document.documentElement.style.setProperty('--primary-color', '#4F46E5');
                         document.documentElement.style.setProperty('--expertise-size', '100px');
                         if (typeof applyDataFallbacks === 'function') {
                             applyDataFallbacks();
                         }
-                        hideLoader();
                     });
             } catch (err) {
                 console.error("Synchronous error during loadState:", err);
                 if (typeof applyDataFallbacks === 'function') {
                     applyDataFallbacks();
                 }
-                hideLoader();
             }
 
-            // Failsafe timeout in case Firebase completely hangs
-            setTimeout(hideLoader, 5000);
         }
     });
 
