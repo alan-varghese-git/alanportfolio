@@ -1443,3 +1443,36 @@ img {
     backdrop-filter: blur(16px);
     background-color: rgba(15, 23, 42, 0.75);
 }
+
+/* Ensure the body and base elements are immediately visible without blocking */
+body {
+    opacity: 1 !important;
+    visibility: visible !important;
+    background-color: #0b0f19; /* Set background immediately */
+}
+
+/* Background canvas/circle animations load instantly */
+.background-circle, .hero-circle-gradient {
+    animation: rotate-circle 20s linear infinite;
+}
+
+@keyframes rotate-circle {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Fade-in animation specifically for content elements */
+.hero-content, .about-section, .expertise-container, .project-card, .cert-card {
+    animation: contentFadeIn 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes contentFadeIn {
+    0% {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
