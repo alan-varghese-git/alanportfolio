@@ -1443,3 +1443,18 @@ input:checked+.slider:before {
 .hero-load-delay-5 {
     animation-delay: 0.5s;
 }
+
+/* Footer Styles */
+.site-footer p {
+    font-family: inherit;
+    letter-spacing: 0.5px;
+}
+@media (max-width: 768px) {
+    .site-footer {
+        padding: 16px 12px !important;
+        margin-top: 20px !important;
+    }
+    .site-footer p {
+        font-size: 0.8rem !important;
+    }
+}
