@@ -1057,6 +1057,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Apply state
     function applyPortfolioState(state) {
+        // Clear out skeleton loaders before hydrating
+        document.querySelectorAll('.skeleton-card').forEach(skel => skel.remove());
+
                 // Restore theme
                 document.documentElement.style.setProperty('--primary-color', state.themeColor);
 
