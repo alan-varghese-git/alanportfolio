@@ -1072,7 +1072,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (el.id) {
                         const htmlVal = savedEdits[el.id];
                         if (htmlVal !== undefined && htmlVal !== "") {
-                            el.innerHTML = htmlVal;
+                            // Only overwrite the DOM if the CMS data actually differs from the hardcoded HTML
+                            if (el.innerHTML !== htmlVal) {
+                                el.innerHTML = htmlVal;
+                            }
                         }
                     }
                 });
