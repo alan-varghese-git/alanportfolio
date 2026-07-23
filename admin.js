@@ -264,6 +264,65 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!initialLoadComplete) {
             initialLoadComplete = true;
 
+                function applyState(data) {
+        if (!data) return;
+
+        // 1. Global Settings
+        if (data.themeColor) {
+            document.documentElement.style.setProperty('--primary-color', data.themeColor);
+        }
+        // Background animation toggle (if any)
+        if (typeof animationType !== 'undefined' && data.bgAnimation) {
+            animationType = data.bgAnimation;
+        }
+
+        // 2. Inline Text Edits
+        if (data.edits) {
+            const savedEdits = {};
+            data.edits.forEach(edit => {
+                savedEdits[edit.id] = edit.html;
+            });
+            document.querySelectorAll('[data-editable="true"]').forEach(el => {
+                if (el.id && savedEdits[el.id] !== undefined) {
+                    if (el.innerHTML !== savedEdits[el.id]) {
+                        el.innerHTML = savedEdits[el.id];
+                    }
+                }
+            });
+        }
+
+        // 3. Simple Array Render Loops
+        const projectContainer = document.getElementById('projects-container');
+        if (projectContainer && data.projects) {
+            projectContainer.innerHTML = data.projects.map(p => `
+                <div class="glass-tile scroll-animate">
+                    <h3 style="color: var(--primary-color); margin-bottom: 10px;">${p.title}</h3>
+                    <p style="color: var(--text-secondary); font-size: 14px; line-height: 1.5;">${p.description}</p>
+                </div>
+            `).join('');
+        }
+
+        const expertiseContainer = document.getElementById('expertise-container');
+        if (expertiseContainer && data.expertise) {
+            expertiseContainer.innerHTML = data.expertise.map(e => `
+                <div class="glass-tile scroll-animate">
+                    <h3 style="color: var(--primary-color); margin-bottom: 10px;">${e.title}</h3>
+                    <p style="color: var(--text-secondary); font-size: 14px; line-height: 1.5;">${e.description}</p>
+                </div>
+            `).join('');
+        }
+
+        const certContainer = document.getElementById('certifications-container');
+        if (certContainer && data.certifications) {
+            certContainer.innerHTML = data.certifications.map(c => `
+                <div class="glass-tile scroll-animate">
+                    <h3 style="color: var(--primary-color); margin-bottom: 10px;">${c.title}</h3>
+                    <p style="color: var(--text-secondary); font-size: 14px; line-height: 1.5;">${c.issuer}</p>
+                </div>
+            `).join('');
+        }
+    }
+
             function loadState() {
                 return fetch('./data.json')
                     .then(res => res.json())
@@ -925,7 +984,7 @@ document.addEventListener('DOMContentLoaded', () => {
         tile.addEventListener('click', handleTileClick);
     }
 
-    async function savePortfolioStateToGitHub() {
+        async function savePortfolioStateToGitHub() {
         // Collect edits
         const edits = [];
         editableElements.forEach((el, index) => {
@@ -933,69 +992,34 @@ document.addEventListener('DOMContentLoaded', () => {
             edits.push({ id: el.id, html: el.innerHTML });
         });
 
-        // Collect sections and their ordered tile IDs
-        const sectionsData = [];
-        document.querySelectorAll('main > section').forEach(sec => {
-            const titleEl = sec.querySelector('.section-header h2');
-            const titleId = titleEl ? titleEl.id : null;
-            const isDynamic = sec.classList.contains('dynamic-section');
-            const isExpertise = sec.classList.contains('expertise-section'); 
-            const grid = sec.querySelector('.glass-grid');
-            const gridId = grid ? grid.id : null;
-            
-            const tileIds = [];
-            if (grid) {
-                grid.querySelectorAll('.glass-tile').forEach(tile => {
-                    tileIds.push(tile.id);
-                });
-            }
-            sectionsData.push({
-                id: sec.id,
-                titleId: titleId,
-                gridId: gridId,
-                isDynamic: isDynamic,
-                isExpertise: isExpertise,
-                tileIds: tileIds
-            });
-        });
-
-        // Collect tiles data
-        const tilesData = [];
-        document.querySelectorAll('.glass-tile').forEach(tile => {
-            tilesData.push({
-                id: tile.id,
-                icon: tile.dataset.icon || '',
-                image: tile.dataset.image || '',
-                link: tile.dataset.link || '',
-                subtitle: tile.dataset.subtitle || '',
-                tech: tile.dataset.tech || '',
-                desc: tile.dataset.desc || '',
-                features: tile.dataset.features || ''
-            });
-        });
-        const layouts = {};
-        document.querySelectorAll('.layout-grid').forEach(grid => {
-            if (grid.classList.contains('stack')) layouts[grid.id] = 'stack';
-            else if (grid.classList.contains('carousel')) layouts[grid.id] = 'carousel';
-            else if (grid.classList.contains('list')) layouts[grid.id] = 'list';
-            else layouts[grid.id] = 'grid';
-        });
-
         const state = {
             themeColor: getComputedStyle(document.documentElement).getPropertyValue('--primary-color').trim(),
-            bgAnimation: animationType,
-            popupsEnabled: popupsToggle.checked,
-            edits: edits,
-            sections: sectionsData,
-            layouts: layouts,
-            photoUrl: profileImg.src.startsWith('data:') ? profileImg.src : null,
-            tilesData: tilesData
+            bgAnimation: typeof animationType !== 'undefined' ? animationType : 'particles',
+            popupsEnabled: document.getElementById('popups-toggle') ? document.getElementById('popups-toggle').checked : true,
+            photoUrl: document.getElementById('profile-img') && document.getElementById('profile-img').src.startsWith('data:') ? document.getElementById('profile-img').src : null,
+            edits: edits
         };
+
+        // Fetch existing data.json to preserve the custom arrays
+        try {
+            const isGitHubPages = window.location.hostname.includes("github.io");
+            const jsonPath = isGitHubPages ? "/alanportfolio/data.json" : "./data.json";
+            const response = await fetch(jsonPath + '?t=' + new Date().getTime());
+            if (response.ok) {
+                const existingData = await response.json();
+                // Preserve custom arrays
+                if (existingData.projects) state.projects = existingData.projects;
+                if (existingData.expertise) state.expertise = existingData.expertise;
+                if (existingData.certifications) state.certifications = existingData.certifications;
+            }
+        } catch (e) {
+            console.error("Failed to fetch existing data to preserve arrays:", e);
+        }
 
         let githubToken = sessionStorage.getItem('github_pat');
         if (!githubToken) {
             githubToken = prompt("Enter your GitHub Personal Access Token to publish to data.json:");
-            if (!githubToken) return;
+            if (!githubToken) return false;
             sessionStorage.setItem('github_pat', githubToken);
         }
 
@@ -1019,7 +1043,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     "Content-Type": "application/json"
                 },
                 body: JSON.stringify({
-                    message: "Update CMS state data.json",
+                    message: "Update CMS state (text edits)",
                     content: base64Json,
                     sha: shaJson
                 })
