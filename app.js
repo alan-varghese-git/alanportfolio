@@ -1,10 +1,4 @@
-// Clear legacy cached data keys on load to prevent old template fallbacks
-try {
-    localStorage.clear();
-    sessionStorage.clear();
-} catch (e) {
-    console.error("Storage clear error:", e);
-}
+
 
 // Unregister stale service workers
 if ('serviceWorker' in navigator) {
