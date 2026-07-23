@@ -924,7 +924,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const titleEl = sec.querySelector('.section-header h2');
             const titleId = titleEl ? titleEl.id : null;
             const isDynamic = sec.classList.contains('dynamic-section');
-            const isExpertise = sec.classList.contains('expertise-section'); // to know what type of tiles to generate
+            const isExpertise = sec.classList.contains('expertise-section'); 
             const grid = sec.querySelector('.glass-grid');
             const gridId = grid ? grid.id : null;
             
@@ -979,53 +979,105 @@ document.addEventListener('DOMContentLoaded', () => {
 
         let githubToken = sessionStorage.getItem('github_pat');
         if (!githubToken) {
-            githubToken = prompt("Enter your GitHub Personal Access Token to save changes to data.json:");
+            githubToken = prompt("Enter your GitHub Personal Access Token to publish static HTML:");
             if (!githubToken) return Promise.reject(new Error("No GitHub PAT provided"));
             sessionStorage.setItem('github_pat', githubToken);
         }
 
+        // 1. Clone the main container
+        const mainClone = document.querySelector('main').cloneNode(true);
+        
+        // 2. Strip all admin/CMS elements
+        mainClone.querySelectorAll('.admin-only').forEach(el => el.remove());
+        mainClone.querySelectorAll('.add-tile-btn').forEach(el => el.remove());
+        mainClone.querySelectorAll('.delete-btn').forEach(el => el.remove());
+        mainClone.querySelectorAll('.upload-overlay').forEach(el => el.remove());
+        mainClone.querySelectorAll('[contenteditable]').forEach(el => {
+            el.removeAttribute('contenteditable');
+            el.removeAttribute('data-editable');
+            el.classList.remove('editable-active');
+        });
+
+        const newMainInner = mainClone.innerHTML;
+        const themeColor = getComputedStyle(document.documentElement).getPropertyValue('--primary-color').trim();
+        
+        // 3. Fetch the latest index.html base template from the repo
         const repoOwner = "alan-varghese-git";
         const repoName = "alanportfolio";
-        const filePath = "data.json";
-        const url = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${filePath}`;
+        const urlHtml = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/index.html`;
 
         try {
-            // 1. Get current file SHA
-            const getRes = await fetch(url, {
+            // Get current file SHA and content
+            const getResHtml = await fetch(urlHtml, {
                 headers: { "Authorization": `token ${githubToken}` }
             });
-            let sha = null;
-            if (getRes.ok) {
-                const fileData = await getRes.json();
-                sha = fileData.sha;
+            let shaHtml = null;
+            let currentHtml = "";
+            if (getResHtml.ok) {
+                const fileData = await getResHtml.json();
+                shaHtml = fileData.sha;
+                // decode base64
+                currentHtml = decodeURIComponent(escape(atob(fileData.content)));
+            } else {
+                throw new Error("Could not fetch current index.html from GitHub");
             }
 
-            // 2. Push updated commit
-            const contentString = JSON.stringify(state, null, 2);
-            // Safe Base64 encoding for Unicode
-            const base64Content = btoa(unescape(encodeURIComponent(contentString)));
+            // 4. Replace the <main> block in the HTML text
+            let updatedHtml = currentHtml.replace(/<main>[\s\S]*?<\/main>/i, `<main>\n${newMainInner}\n    </main>`);
             
-            const putRes = await fetch(url, {
+            // 5. Update Theme Color in <head> if a dynamic style block exists, or add one
+            const themeBlock = `<style id="dynamic-theme">:root { --primary-color: ${themeColor}; }</style>`;
+            if (updatedHtml.includes('id="dynamic-theme"')) {
+                updatedHtml = updatedHtml.replace(/<style id="dynamic-theme">[\s\S]*?<\/style>/i, themeBlock);
+            } else {
+                updatedHtml = updatedHtml.replace('</head>', `    ${themeBlock}\n</head>`);
+            }
+
+            // Safe Base64 encoding for Unicode
+            const base64Html = btoa(unescape(encodeURIComponent(updatedHtml)));
+            const base64Json = btoa(unescape(encodeURIComponent(JSON.stringify(state, null, 2))));
+            
+            const putResHtml = await fetch(urlHtml, {
                 method: "PUT",
                 headers: {
                     "Authorization": `token ${githubToken}`,
                     "Content-Type": "application/json"
                 },
                 body: JSON.stringify({
-                    message: "Update portfolio content via Admin panel",
-                    content: base64Content,
-                    sha: sha
+                    message: "Publish static HTML update via Admin panel",
+                    content: base64Html,
+                    sha: shaHtml
                 })
             });
 
-            if (putRes.ok) {
+            // 6. Push data.json update to GitHub
+            let shaJson = null;
+            const urlJson = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/data.json`;
+            const getResJson = await fetch(urlJson, { headers: { "Authorization": `token ${githubToken}` } });
+            if (getResJson.ok) {
+                const jsonData = await getResJson.json();
+                shaJson = jsonData.sha;
+            }
+            const putResJson = await fetch(urlJson, {
+                method: "PUT",
+                headers: {
+                    "Authorization": `token ${githubToken}`,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    message: "Update CMS state data.json",
+                    content: base64Json,
+                    sha: shaJson
+                })
+            });
+
+            if (putResHtml.ok && putResJson.ok) {
                 return true;
             } else {
-                if (putRes.status === 401 || putRes.status === 403) {
-                    sessionStorage.removeItem('github_pat'); // clear invalid token
+                if (putResHtml.status === 401 || putResHtml.status === 403 || putResJson.status === 401) {
+                    sessionStorage.removeItem('github_pat'); 
                 }
-                const errorData = await putRes.json();
-                throw new Error(errorData.message || "Failed to push to GitHub");
+                throw new Error("Failed to push updates to GitHub. Ensure PAT is valid and has repo scope.");
             }
         } catch (error) {
             throw error;
