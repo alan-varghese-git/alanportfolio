@@ -1,3 +1,11 @@
+// Clear legacy cached data keys on load to prevent old template fallbacks
+try {
+    localStorage.clear();
+    sessionStorage.clear();
+} catch (e) {
+    console.error("Storage clear error:", e);
+}
+
 // Unregister stale service workers
 if ('serviceWorker' in navigator) {
     navigator.serviceWorker.getRegistrations().then(function(registrations) {
@@ -251,18 +259,9 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 loadState().catch(error => {
                         console.error("Firebase load error:", error);
-                        document.documentElement.style.setProperty('--primary-color', '#4F46E5');
-                        document.documentElement.style.setProperty('--expertise-size', '100px');
-                        if (typeof applyDataFallbacks === 'function') {
-                            applyDataFallbacks();
-                        }
+
                     });
-            } catch (err) {
-                console.error("Synchronous error during loadState:", err);
-                if (typeof applyDataFallbacks === 'function') {
-                    applyDataFallbacks();
-                }
-            }
+
 
         }
     });
@@ -1014,55 +1013,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    function applyDataFallbacks(savedEdits = {}, savedPhotoUrl = "") {
-        const defaultText = {
-            'edit-hero-greet': 'Hi I am',
-            'edit-hero-name': 'Alan Varghese',
-            'edit-hero-title': 'BTech CSE student',
-            'edit-hero-desc': 'I enjoy building simple, modern, and user-friendly web applications. I\'m always learning new technologies and improving my development skills. My interests include full-stack development, UI/UX, and cloud technologies. I love creating projects that solve real-world problems. I\'m always exploring, building, and learning.',
-            'edit-btn-cv': 'Download CV',
-            'edit-stat1-num': '5+',
-            'edit-stat1-lbl': 'Experiences',
-            'edit-stat2-num': '20+',
-            'edit-stat2-lbl': 'Projects done',
-            'edit-stat3-num': '80+',
-            'edit-stat3-lbl': 'Happy Clients',
-            'edit-title-expertise': 'My Expertise',
-            'edit-skill-1': 'Python',
-            'edit-skill-2': 'Machine Learning',
-            'edit-skill-3': 'Networking',
-            'edit-skill-4': 'Git & GitHub',
-            'edit-skill-5': 'Java',
-            'edit-skill-6': 'C++',
-            'edit-skill-7': 'Web Dev',
-            'edit-skill-8': 'Databases',
-            'edit-exp1-title': 'Senior Developer',
-            'edit-exp1-desc': 'Tech Corp',
-            'edit-exp2-title': 'Software Engineer',
-            'edit-exp2-desc': 'StartUp Inc',
-            'edit-proj1-title': 'Smart Attendance',
-            'edit-proj1-desc': 'React, Firebase',
-            'edit-proj2-title': 'E-Commerce Platform',
-            'edit-proj2-desc': 'NextJS, Stripe',
-            'edit-pub1-title': 'Research Paper',
-            'edit-pub1-desc': 'IEEE 2024'
-        };
 
-        // Restore all editable text across the DOM
-        document.querySelectorAll('[data-editable="true"]').forEach(el => {
-            if (el.id) {
-                const htmlVal = savedEdits[el.id];
-                if (htmlVal !== undefined && htmlVal !== "") {
-                    el.innerHTML = htmlVal;
-                } else if (defaultText[el.id]) {
-                    el.innerHTML = defaultText[el.id];
-                }
-            }
-        });
-
-        // Apply fallback for profile photo if missing or empty
-        updateProfileImage(savedPhotoUrl);
-    }
 
     // Load state
     function loadState() {
@@ -1153,7 +1104,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     });
                 }
 
-                applyDataFallbacks(savedEdits, state.photoUrl);
+                updateProfileImage(state.photoUrl);
 
                 // Restore active swatch
                 swatches.forEach(s => {
@@ -1180,11 +1131,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     });
                 }
             } else {
-                console.warn("No portfolio_settings document found. Applying default fallbacks.");
-                // Apply default fallback styles for an empty database
-                document.documentElement.style.setProperty('--primary-color', '#4F46E5');
-                document.documentElement.style.setProperty('--expertise-size', '100px');
-                applyDataFallbacks();
             }
         });
     }
