@@ -1062,7 +1062,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // Load state
     async function loadState() {
         try {
-            const response = await fetch('./data.json?t=' + new Date().getTime());
+            const isGitHubPages = window.location.hostname.includes("github.io");
+            const jsonPath = isGitHubPages ? "/alanportfolio/data.json" : "./data.json";
+            
+            const response = await fetch(jsonPath + '?t=' + new Date().getTime());
             if (!response.ok) return;
             const state = await response.json();
             
