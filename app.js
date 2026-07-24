@@ -602,6 +602,18 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 if (isLarge) {
                     const titleEl = tile.querySelector('h3');
+                    
+                    const imageUrl = tile.dataset.image;
+                    const popupImageContainer = document.getElementById('popup-proj-image-container');
+                    const popupImage = document.getElementById('popup-proj-image');
+                    if (imageUrl) {
+                        popupImage.src = imageUrl;
+                        popupImageContainer.style.display = 'flex';
+                    } else {
+                        popupImageContainer.style.display = 'none';
+                        popupImage.src = '';
+                    }
+
                     popupProjTitle.innerHTML = titleEl ? titleEl.innerHTML : 'Details';
                     popupProjSubtitle.innerHTML = tile.dataset.subtitle || '';
 
@@ -892,6 +904,18 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             if (isLarge) {
                 const titleEl = tile.querySelector('h3.tile-title') || tile.querySelector('h3');
+                
+                const imageUrl = tile.dataset.image;
+                const popupImageContainer = document.getElementById('popup-proj-image-container');
+                const popupImage = document.getElementById('popup-proj-image');
+                if (imageUrl) {
+                    popupImage.src = imageUrl;
+                    popupImageContainer.style.display = 'flex';
+                } else {
+                    popupImageContainer.style.display = 'none';
+                    popupImage.src = '';
+                }
+
                 popupProjTitle.innerHTML = titleEl ? titleEl.innerHTML : 'Details';
                 popupProjSubtitle.innerHTML = tile.dataset.subtitle || '';
 
