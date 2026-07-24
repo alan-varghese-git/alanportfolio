@@ -666,7 +666,9 @@ document.addEventListener('DOMContentLoaded', () => {
     if (largeTileForm) {
         largeTileForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            if (!currentEditingTile || !currentEditingTile.classList.contains('vertical-tile')) return;
+            if (!currentEditingTile) return;
+            const isLarge = currentEditingTile.classList.contains('vertical-tile') || currentEditingTile.classList.contains('list-tile');
+            if (!isLarge) return;
 
             const submitBtn = largeTileForm.querySelector('button[type="submit"]');
             submitBtn.disabled = true;
@@ -707,8 +709,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Update local DOM data
                 const titleEl = currentEditingTile.querySelector('h3');
                 if (titleEl) titleEl.innerText = largeTileTitle.value.trim();
-                const descEl = currentEditingTile.querySelector('p');
-                if (descEl) descEl.innerText = largeTileOverview.value.trim();
+                
+                if (currentEditingTile.classList.contains('list-tile')) {
+                    const dateEl = currentEditingTile.querySelector('.card-meta');
+                    if (dateEl && largeTileSubtitle.value.trim()) dateEl.innerText = largeTileSubtitle.value.trim();
+                    const descEl = currentEditingTile.querySelector('.card-desc');
+                    if (descEl) descEl.innerText = largeTileOverview.value.trim();
+                } else {
+                    const descEl = currentEditingTile.querySelector('p');
+                    if (descEl) descEl.innerText = largeTileOverview.value.trim();
+                }
 
                 currentEditingTile.dataset.subtitle = largeTileSubtitle.value.trim();
                 currentEditingTile.dataset.tech = largeTileTech.value.trim();
