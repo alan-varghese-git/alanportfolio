@@ -1494,52 +1494,64 @@ body.admin-mode .list-tile .card-info p:last-child {
     margin-top: 8px;
 }
 
-/* --- Mobile Card Layout Fixes (Experiences, Certifications, Publications) --- */
+/* --- Exact Mobile Alignment Fix for Experience & Certification Cards --- */
 @media screen and (max-width: 768px) {
-    /* Responsive adjustment for horizontal card containers */
     .glass-tile.list-tile {
-        padding: 14px 16px !important;
-        gap: 12px !important;
-        align-items: center !important; /* Vertically center icon box with text in collapsed view */
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important; /* Perfect vertical centering */
+        justify-content: flex-start !important;
+        padding: 16px 20px !important;
+        gap: 16px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
     }
 
-    /* Icon Box Sizing for Mobile */
+    /* Square Icon Container */
     .glass-tile.list-tile .card-icon-box {
-        padding: 10px !important;
-        width: 42px !important;
-        height: 42px !important;
+        flex-shrink: 0 !important;
+        width: 52px !important;
+        height: 52px !important;
+        border-radius: 14px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        padding: 0 !important;
+        margin: 0 !important;
     }
 
     .glass-tile.list-tile .card-icon-box svg {
-        width: 18px !important;
-        height: 18px !important;
+        width: 22px !important;
+        height: 22px !important;
     }
 
-    /* Text Block Alignment */
+    /* Text Column (Title + Date) */
     .glass-tile.list-tile .card-info {
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        text-align: left; /* Keep left alignment tight */
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: center !important;
+        align-items: flex-start !important;
+        gap: 6px !important;
+        text-align: left !important;
+        flex-grow: 1 !important;
     }
 
-    /* Title & Date Alignment */
+    /* Title Styling */
     .glass-tile.list-tile .card-info h3 {
-        font-size: 0.95rem !important;
-        line-height: 1.3 !important;
-        margin-bottom: 2px !important;
-        word-break: break-word; /* Prevent awkward word overflows */
+        font-size: 1.05rem !important;
+        font-weight: 600 !important;
+        line-height: 1.2 !important;
+        margin: 0 !important;
+        color: var(--primary-color) !important;
     }
 
+    /* Date/Meta Line Styling */
     .glass-tile.list-tile .card-info .card-meta {
-        font-size: 0.78rem !important;
-        margin-bottom: 0 !important;
-    }
-
-    /* Expand Description Below Icon on Hover/Tap for Mobile */
-    .glass-tile.list-tile:hover .card-info p.card-desc,
-    .glass-tile.list-tile:active .card-info p.card-desc {
-        font-size: 0.82rem !important;
-        line-height: 1.4 !important;
+        font-size: 0.85rem !important;
+        margin: 0 !important;
+        color: color-mix(in srgb, var(--primary-color) 50%, #94a3b8) !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 6px !important;
     }
 }
