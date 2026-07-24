@@ -57,6 +57,15 @@ window.addEventListener('beforeunload', () => {
 });
 
 document.addEventListener('DOMContentLoaded', () => {
+    // Helper to format Google Drive links to direct images
+    function formatGoogleDriveUrl(url) {
+        if (!url) return '';
+        const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+        if (match && match[1]) {
+            return `https://lh3.googleusercontent.com/d/${match[1]}`;
+        }
+        return url;
+    }
 
     window.scrollTo(0, 0);
     // Clear any URL hash on initial load to prevent browser jump behavior
@@ -603,15 +612,26 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (isLarge) {
                     const titleEl = tile.querySelector('h3');
                     
-                    const imageUrl = tile.dataset.image;
+                    const rawImageUrl = tile.dataset.image;
+                    const displayImageUrl = formatGoogleDriveUrl(rawImageUrl);
                     const popupImageContainer = document.getElementById('popup-proj-image-container');
                     const popupImage = document.getElementById('popup-proj-image');
-                    if (imageUrl) {
-                        popupImage.src = imageUrl;
+                    const popupImageLink = document.getElementById('popup-proj-image-link');
+                    
+                    if (displayImageUrl) {
+                        popupImage.src = displayImageUrl;
                         popupImageContainer.style.display = 'flex';
                     } else {
                         popupImageContainer.style.display = 'none';
                         popupImage.src = '';
+                    }
+
+                    if (rawImageUrl) {
+                        popupImageLink.href = rawImageUrl;
+                        popupImageLink.style.display = 'inline-flex';
+                    } else {
+                        popupImageLink.style.display = 'none';
+                        popupImageLink.href = '#';
                     }
 
                     popupProjTitle.innerHTML = titleEl ? titleEl.innerHTML : 'Details';
@@ -915,15 +935,26 @@ document.addEventListener('DOMContentLoaded', () => {
             if (isLarge) {
                 const titleEl = tile.querySelector('h3.tile-title') || tile.querySelector('h3');
                 
-                const imageUrl = tile.dataset.image;
+                const rawImageUrl = tile.dataset.image;
+                const displayImageUrl = formatGoogleDriveUrl(rawImageUrl);
                 const popupImageContainer = document.getElementById('popup-proj-image-container');
                 const popupImage = document.getElementById('popup-proj-image');
-                if (imageUrl) {
-                    popupImage.src = imageUrl;
+                const popupImageLink = document.getElementById('popup-proj-image-link');
+                
+                if (displayImageUrl) {
+                    popupImage.src = displayImageUrl;
                     popupImageContainer.style.display = 'flex';
                 } else {
                     popupImageContainer.style.display = 'none';
                     popupImage.src = '';
+                }
+
+                if (rawImageUrl) {
+                    popupImageLink.href = rawImageUrl;
+                    popupImageLink.style.display = 'inline-flex';
+                } else {
+                    popupImageLink.style.display = 'none';
+                    popupImageLink.href = '#';
                 }
 
                 popupProjTitle.innerHTML = titleEl ? titleEl.innerHTML : 'Details';

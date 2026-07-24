@@ -1555,3 +1555,12 @@ body.admin-mode .list-tile .card-info p:last-child {
         gap: 6px !important;
     }
 }
+
+/* View Image Button Hover Effects */
+.btn-view-image:hover {
+    background: rgba(59, 130, 246, 0.3) !important;
+    color: #ffffff !important;
+    border-color: #3b82f6 !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
+}
