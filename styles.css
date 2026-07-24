@@ -1493,3 +1493,53 @@ body.admin-mode .list-tile .card-info p:last-child {
     opacity: 1;
     margin-top: 8px;
 }
+
+/* --- Mobile Card Layout Fixes (Experiences, Certifications, Publications) --- */
+@media screen and (max-width: 768px) {
+    /* Responsive adjustment for horizontal card containers */
+    .glass-tile.list-tile {
+        padding: 14px 16px !important;
+        gap: 12px !important;
+        align-items: center !important; /* Vertically center icon box with text in collapsed view */
+    }
+
+    /* Icon Box Sizing for Mobile */
+    .glass-tile.list-tile .card-icon-box {
+        padding: 10px !important;
+        width: 42px !important;
+        height: 42px !important;
+    }
+
+    .glass-tile.list-tile .card-icon-box svg {
+        width: 18px !important;
+        height: 18px !important;
+    }
+
+    /* Text Block Alignment */
+    .glass-tile.list-tile .card-info {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        text-align: left; /* Keep left alignment tight */
+    }
+
+    /* Title & Date Alignment */
+    .glass-tile.list-tile .card-info h3 {
+        font-size: 0.95rem !important;
+        line-height: 1.3 !important;
+        margin-bottom: 2px !important;
+        word-break: break-word; /* Prevent awkward word overflows */
+    }
+
+    .glass-tile.list-tile .card-info .card-meta {
+        font-size: 0.78rem !important;
+        margin-bottom: 0 !important;
+    }
+
+    /* Expand Description Below Icon on Hover/Tap for Mobile */
+    .glass-tile.list-tile:hover .card-info p.card-desc,
+    .glass-tile.list-tile:active .card-info p.card-desc {
+        font-size: 0.82rem !important;
+        line-height: 1.4 !important;
+    }
+}
